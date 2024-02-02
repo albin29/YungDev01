@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Npgsql;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -11,24 +12,27 @@ public class Server
 {
     private bool _listen = true;
     private int _port = 3000;
-    public Server()
-    {
+    private HttpListener _listener = new();
 
-        HttpListener listener = new();
-        listener.Prefixes.Add($"http://localhost:{_port}/");
+    private readonly NpgsqlDataSource _db;
+    public Server(NpgsqlDataSource db)
+    {
+        _db = db;
+
+        _listener.Prefixes.Add($"http://localhost:{_port}/");
 
         ControlC();
 
         try
         {
-            listener.Start();
-            listener.BeginGetContext(new AsyncCallback(HandleRequest), listener);
+            _listener.Start();
+            _listener.BeginGetContext(new AsyncCallback(HandleRequest), _listener);
             while (_listen) { };
 
         }
         finally
         {
-            listener.Stop();
+            _listener.Stop();
         }
     }
 
@@ -58,17 +62,38 @@ public class Server
 
     void Router(HttpListenerContext context)
     {
+        //Meny för
         HttpListenerRequest request = context.Request;
         HttpListenerResponse response = context.Response;
 
         var path = request.Url?.AbsolutePath;
         string? lastPath = request.Url?.AbsolutePath.Split("/").Last();
 
-        /*if (request.HttpMethod == "GET")
+        if (request.HttpMethod == "GET")
         {
-            
-            if (path != null && path.Contains("/users/"))
+
+            if (path != null && path.Contains("/menu"))
             {
+                Menu menu = new Menu();
+
+                HelloGet(response, menu.ShowOptions());
+
+
+
+                if (path.Contains("/walks/"))
+                {
+                    string qRandom =
+                       $@"SELECT name, stamina, day, money
+                       FROM users
+                       WHERE users.id = @userId;";
+                    //command.Parameters.AddWithValue("userId", Convert.ToInt32(lastPath));
+                }
+                if (path.Contains("/sleeps/"))
+                {
+
+
+                }
+
                 string result = string.Empty;
 
                 Console.WriteLine(lastPath);
@@ -76,7 +101,8 @@ public class Server
                     $@"SELECT name, stamina, day, money
                        FROM users
                        WHERE users.id = @userId;";
-                using var command = db.CreateCommand(qUser);
+                /*
+                using var command = _db.CreateCommand(qUser);
                 command.Parameters.AddWithValue("userId", Convert.ToInt32(lastPath));
 
 
@@ -93,9 +119,20 @@ public class Server
                     result += reader.GetInt32(3);
 
                 }
+                */
                 HelloGet(response, result);
             }
-        }*/
+        }
+
+        if (request.HttpMethod == "POST")
+        {
+            if (path != null && path.Contains("/register/"))
+            {
+                Character character = new Character(lastPath);
+            }
+        }
+
+        Character albin = new Character("Albin", 0, 5, null);
 
         switch (request.HttpMethod, request.Url?.AbsolutePath)
         {
