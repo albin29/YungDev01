@@ -60,20 +60,22 @@ public class Server
     {
         HttpListenerRequest request = context.Request;
         HttpListenerResponse response = context.Response;
+
         var path = request.Url?.AbsolutePath;
         string? lastPath = request.Url?.AbsolutePath.Split("/").Last();
 
-        if (request.HttpMethod == "GET")
+        /*if (request.HttpMethod == "GET")
         {
-            /*
+            
             if (path != null && path.Contains("/users/"))
             {
                 string result = string.Empty;
 
                 Console.WriteLine(lastPath);
-                string qUser = $@"SELECT name, stamina, day, money
-                             FROM users
-                             WHERE users.id = @userId;";
+                string qUser =
+                    $@"SELECT name, stamina, day, money
+                       FROM users
+                       WHERE users.id = @userId;";
                 using var command = db.CreateCommand(qUser);
                 command.Parameters.AddWithValue("userId", Convert.ToInt32(lastPath));
 
@@ -92,15 +94,15 @@ public class Server
 
                 }
                 HelloGet(response, result);
-            }*/
-        }
+            }
+        }*/
 
         switch (request.HttpMethod, request.Url?.AbsolutePath)
         {
             case ("GET", "/users"):
                 RootGet(response);
                 break;
-            case ("GET", "/users/1"):
+            case ("GET", "/users/"):
                 break;
             case ("POST", "/"):
                 RootPost(request, response);
