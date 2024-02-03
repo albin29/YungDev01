@@ -9,6 +9,6 @@ Console.WriteLine("Hello");
 
 
 Table table = new Table(_db);
-table.CreateTables();
+await table.CreateTables();
 
 Server server = new Server(_db);

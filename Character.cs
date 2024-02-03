@@ -7,8 +7,9 @@ using System.Threading.Tasks;
 
 namespace YungDev01;
 
-public record Character(string name, int skills, int stamina, string? location)
+public record Character(string? name, int? skills, int? stamina, int? location)
 {
+
  // body.split(",");
 
     // name = body[0];

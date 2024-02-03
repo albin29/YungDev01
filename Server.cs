@@ -69,10 +69,24 @@ public class Server
         var path = request.Url?.AbsolutePath;
         string? lastPath = request.Url?.AbsolutePath.Split("/").Last();
 
+
+        switch (request.HttpMethod)
+        {
+            case ("GET"):
+            Get get = new Get(response);
+                break;
+            case ("POST"):
+            Post post = new Post(request, response, _db);
+                post.Options();
+                break;
+
+
+        }
+
         if (request.HttpMethod == "GET")
         {
 
-            if (path != null && path.Contains("/menu"))
+            if (path != null && path.Contains("/user"))
             {
                 Menu menu = new Menu();
 
@@ -80,7 +94,7 @@ public class Server
 
 
 
-                if (path.Contains("/walks/"))
+                if (path.Contains("/walks/locations"))
                 {
                     string qRandom =
                        $@"SELECT name, stamina, day, money
@@ -126,27 +140,10 @@ public class Server
 
         if (request.HttpMethod == "POST")
         {
-            if (path != null && path.Contains("/register/"))
+            if (path != null && path.Contains("/register"))
             {
-                Character character = new Character(lastPath);
-            }
-        }
-
-        Character albin = new Character("Albin", 0, 5, null);
-
-        switch (request.HttpMethod, request.Url?.AbsolutePath)
-        {
-            case ("GET", "/users"):
-                RootGet(response);
-                break;
-            case ("GET", "/users/"):
-                break;
-            case ("POST", "/"):
                 RootPost(request, response);
-                break;
-            default:
-                NotFound(response);
-                break;
+            }
         }
     }
 
