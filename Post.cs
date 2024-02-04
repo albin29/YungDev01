@@ -8,16 +8,13 @@ using System.Threading.Tasks;
 
 namespace YungDev01;
 
-public class Post(HttpListenerRequest req, HttpListenerResponse res, NpgsqlDataSource _db)
+public class Post(NpgsqlDataSource db)
 {
-    private HttpListener _listener = new();
-
-    private string? path = req.Url?.AbsolutePath;
-    private string? lastPath = req.Url?.AbsolutePath.Split("/").Last();
-
-
-    public void Options()
+    public void PostCommands(HttpListenerRequest req, HttpListenerResponse res)
     {
+        var path = req.Url?.AbsolutePath;
+        string? lastPath = req.Url?.AbsolutePath.Split("/").Last();
+
         if (path != null && path.Contains("/register"))
         {
             StreamReader reader = new(req.InputStream, req.ContentEncoding);
@@ -25,18 +22,18 @@ public class Post(HttpListenerRequest req, HttpListenerResponse res, NpgsqlDataS
 
             CharacterRegister(body);
 
-            Console.WriteLine($"Registered user in DB: {body}");
+            Console.WriteLine($"Created the following in db: {body}");
+
             res.StatusCode = (int)HttpStatusCode.Created;
             res.Close();
         }
         if (path != null && path.Contains("/moveto/"))
         {
-            
+
 
 
         }
     }
-
     public Character CharacterRegister(string body)
     {
         string[] parts = body.Split(",");
@@ -51,7 +48,7 @@ public class Post(HttpListenerRequest req, HttpListenerResponse res, NpgsqlDataS
         string qRegisterUser = @"
         insert into character (name, skills, stamina) Values
         (@name, @skills, @stamina);";
-        var cmd = _db.CreateCommand(qRegisterUser);
+        var cmd = db.CreateCommand(qRegisterUser);
         cmd.Parameters.AddWithValue("name", name);
         cmd.Parameters.AddWithValue("skills", skills);
         cmd.Parameters.AddWithValue("stamina", stamina);
