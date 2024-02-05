@@ -83,12 +83,13 @@ public class Get(HttpListenerResponse res, HttpListenerRequest req, NpgsqlDataSo
             while (reader.Read())
             {
                 result += "[";
-                result += reader.GetString(0);
+                result += reader.GetString(0).PadRight(10); 
                 result += "] Days: ";
-                result += reader.GetInt32(1); 
+                result += reader.GetInt32(1).ToString().PadLeft(5);
                 result += " | Score: ";
-                result += reader.GetInt32(2);
+                result += reader.GetInt32(2).ToString().PadLeft(5); 
                 result += "\n";
+
             }
             return result;
 
