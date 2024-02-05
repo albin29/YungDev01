@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Formats.Asn1.AsnWriter;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace YungDev01;
@@ -97,13 +98,42 @@ public class Get(HttpListenerResponse res, HttpListenerRequest req, NpgsqlDataSo
             }
             return result;
         }
+        if (path != null && path == "/scoreboard")
+        {
+            string result = "\u001b[91;1m************** HIGHSCORE **************\u001b[0m\n"; 
+
+            string qCharacter = @"
+            SELECT player_name, current_day, score 
+            FROM highscores
+            ORDER BY score DESC;";
+
+
+            using var command = db.CreateCommand(qCharacter);
+            var reader = command.ExecuteReader();
+
+            while (reader.Read())
+            {
+                result += "[";
+                result += reader.GetString(0).PadRight(10); 
+                result += "] Days: ";
+                result += reader.GetInt32(1).ToString().PadLeft(5);
+                result += " | Score: ";
+                result += reader.GetInt32(2).ToString().PadLeft(5); 
+                result += "\n";
+
+            }
+            return result;
+
+        }
+
         else
         {
             NotFound(res);
         }
         return "";
     }
-    public void NotFound(HttpListenerResponse res)
+
+        public void NotFound(HttpListenerResponse res)
     {
         res.StatusCode = (int)HttpStatusCode.NotFound;
         res.Close();
