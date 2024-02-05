@@ -69,7 +69,7 @@ public class Get(HttpListenerResponse res, HttpListenerRequest req, NpgsqlDataSo
         }
         if (path != null && path == "/scoreboard")
         {
-            string result = string.Empty;
+            string result = "\u001b[91;1m*********** SCOREBOARD ***********\u001b[0m\n"; 
 
             string qCharacter = @"
             SELECT player_name, current_day, score 
