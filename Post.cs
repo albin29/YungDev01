@@ -37,7 +37,7 @@ public class Post(NpgsqlDataSource db)
             Console.WriteLine($"Created the following in db: {body}");
 
             res.StatusCode = (int)HttpStatusCode.Created;
-            res.Close();   
+            res.Close();
         }
 
     }
@@ -61,23 +61,41 @@ public class Post(NpgsqlDataSource db)
     }
     public void MoveTo(string body)
     {
+        //curl -X POST localhost:3000/moveto -d {character},{locationNumber}
         string[] parts = body.Split(",");
-        string name = parts[0];
-        int skills = Convert.ToInt32(parts[1]);
-        int stamina = Convert.ToInt32(parts[2]);
+        string character = parts[0];
+        string locationNumber = parts[1];
+        if (int.TryParse(locationNumber, out int result))
+        {
+            //query för id där man kollar hur mycket stamina och skills den har, sätt det i en annan variabel,
+            //gör sen en till query för att se hur mycket der krävs för att gå dit,
+            //sen ta det - vad jag har, är det mindre än 0 så går det inte
+            if (result == 0)
+            {
+                Console.WriteLine("Location changed to ");
+            }
+            else if (result == 1)
+            {
+
+            }
+            else if (result == 2)
+            {
+
+            }
+        }
+
+
+
+
+
+
 
         //curl -X POST localhost:3000/register -d Danijel,12,5
 
-        string qRegisterUser = @"
-        insert into character (name, skills, stamina) Values
-        (@name, @skills, @stamina);";
-        var cmd = db.CreateCommand(qRegisterUser);
-        cmd.Parameters.AddWithValue("name", name);
-        cmd.Parameters.AddWithValue("skills", skills);
-        cmd.Parameters.AddWithValue("stamina", stamina);
-        cmd.ExecuteNonQuery();
+
+
+
 
 
     }
-
 }
