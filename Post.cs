@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -65,6 +66,24 @@ public class Post(NpgsqlDataSource db)
         string[] parts = body.Split(",");
         string character = parts[0];
         string locationNumber = parts[1];
+
+        string qStaminaSkills = @"
+        select stamina_cost, skill_point_award from locations where id = @locationId;
+";
+
+        var cmd = db.CreateCommand(qStaminaSkills);
+        cmd.Parameters.AddWithValue("locationId", locationNumber);
+        using (NpgsqlDataReader reader = cmd.ExecuteReader())
+        {
+            reader.Read();
+            {
+                int staminaCost = reader.GetInt32(0);
+                int skillPointAward = reader.GetInt32(1);
+                Console.WriteLine($"Stamina cost: {staminaCost}, Skill point award: {skillPointAward}");
+            }
+        }
+        
+        
         if (int.TryParse(locationNumber, out int result))
         {
             //query för id där man kollar hur mycket stamina och skills den har, sätt det i en annan variabel,
