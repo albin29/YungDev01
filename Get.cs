@@ -16,7 +16,7 @@ public class Get(HttpListenerResponse res, HttpListenerRequest req, NpgsqlDataSo
         var path = req.Url?.AbsolutePath;
         var lastPath = req.Url?.AbsolutePath.Split("/").Last();
 
-        if (path != null && path == "/users/")
+        if (path != null && path == "/users")
         {
             string result = string.Empty;
 
@@ -41,6 +41,37 @@ public class Get(HttpListenerResponse res, HttpListenerRequest req, NpgsqlDataSo
             }
             return result;
         }
+
+        else if (path != null && path.Contains("/users/"))
+        {
+            string result = string.Empty;
+            string qCharacter = $@"
+            SELECT id, name, skills, stamina
+            FROM character
+            WHERE id = {lastPath};";
+            using var command = db.CreateCommand(qCharacter);
+            var reader = command.ExecuteReader();
+
+            while (reader.Read())
+            {
+                result += "[";
+                result += reader.GetInt32(0);
+                result += ". ";
+                result += reader.GetString(1);
+                result += "] Skills: ";
+                result += reader.GetInt32(2);
+                result += " | Stamina: ";
+                result += reader.GetInt32(3);
+                result += "\n";
+            }
+            return result;
+
+
+
+
+        }
+
+
         else if (path != null && path == "/locations")
         {
             string result = string.Empty;
