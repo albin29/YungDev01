@@ -15,6 +15,7 @@ HttpListener listener = new();
 listener.Prefixes.Add($"http://localhost:{port}/");
 
 ControlC();
+Console.WriteLine("Server is up and running..");
 
 try
 {
@@ -55,11 +56,13 @@ void Router(HttpListenerContext context)
 {
     HttpListenerRequest req = context.Request;
     HttpListenerResponse res = context.Response;
+    Get get = new Get(res, req, db);
+    Post post = new Post(db);
 
     switch (req.HttpMethod)
     {
+
         case ("GET"):
-            Get get = new Get(res, req, db);
 
             byte[] buffer = Encoding.UTF8.GetBytes(get.GetMessage());
             res.ContentType = "text/plain";
@@ -69,11 +72,10 @@ void Router(HttpListenerContext context)
             res.OutputStream.Close();
             break;
         case ("POST"):
-            Post post = new Post(db);
             post.PostCommands(req, res);
             break;
         default:
-            //NotFound(response);
+            get.NotFound(res);
             break;
     }
 }

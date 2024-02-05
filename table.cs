@@ -87,13 +87,9 @@ public class Table(NpgsqlDataSource db)
                         insert into player (id, name, password) values (10, 'Ichabod', 'Guiden');";
         await db.CreateCommand(mockdataPlayer).ExecuteNonQueryAsync();
 
-        string qDropCharacterTable = @"
-        drop table if exists Character;";
-
-        await db.CreateCommand(qDropCharacterTable).ExecuteNonQueryAsync();
 
         string qCharacterTable = @"
-        Create table if not exists Character(
+        Create table if not exists character(
         id      serial      primary key,
         name                text,
         skills              int,
@@ -102,8 +98,23 @@ public class Table(NpgsqlDataSource db)
 
         await db.CreateCommand(qCharacterTable).ExecuteNonQueryAsync();
 
+        string qLocations = @"
+        create table if not exists locations(
+        id      serial      primary key,
+        name                text,
+        stamina_cost        int,
+        skill_point_award   int)";
 
-        string mockdataPlayer_Stats = @"insert into player_stats (player_id, current_day, programming_skill, math_skill, money, stamina, score) values (1, 19, 5, 2, 710, 1, 663);
+        await db.CreateCommand(qLocations).ExecuteNonQueryAsync();
+
+        string qLocationInsertions = @"
+        insert into locations (name, stamina_cost, skill_point_award) values
+        ('Marks House', 2, 1),
+        ('Underground Study', 3, 5);";
+
+        await db.CreateCommand(qLocationInsertions).ExecuteNonQueryAsync();
+
+        /*string mockdataPlayer_Stats = @"insert into player_stats (player_id, current_day, programming_skill, math_skill, money, stamina, score) values (1, 19, 5, 2, 710, 1, 663);
                         insert into player_stats (player_id, current_day, programming_skill, math_skill, money, stamina, score) values (2, 25, 14, 5, 973, 5, 71);
                         insert into player_stats (player_id, current_day, programming_skill, math_skill, money, stamina, score) values (3, 20, 4, 1, 181, 3, 376);
                         insert into player_stats (player_id, current_day, programming_skill, math_skill, money, stamina, score) values (4, 27, 5, 4, 541, 3, 250);
@@ -113,6 +124,7 @@ public class Table(NpgsqlDataSource db)
                         insert into player_stats (player_id, current_day, programming_skill, math_skill, money, stamina, score) values (8, 13, 15, 13, 828, 3, 285);
                         insert into player_stats (player_id, current_day, programming_skill, math_skill, money, stamina, score) values (9, 19, 19, 3, 42, 4, 296);
                         insert into player_stats (player_id, current_day, programming_skill, math_skill, money, stamina, score) values (10, 23, 16, 11, 289, 3, 789);";
-        //await db.CreateCommand(mockdataPlayer_Stats).ExecuteNonQueryAsync();
+        await db.CreateCommand(mockdataPlayer_Stats).ExecuteNonQueryAsync();
+        */
     }
 }
