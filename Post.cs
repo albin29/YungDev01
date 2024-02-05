@@ -39,15 +39,32 @@ public class Post(NpgsqlDataSource db)
             res.StatusCode = (int)HttpStatusCode.Created;
             res.Close();   
         }
+
     }
-    public Character CharacterRegister(string body)
+    public void CharacterRegister(string body)
     {
         string[] parts = body.Split(",");
         string name = parts[0];
         int skills = Convert.ToInt32(parts[1]);
         int stamina = Convert.ToInt32(parts[2]);
 
-        Character character = new Character(name, skills, stamina, null);
+        //curl -X POST localhost:3000/register -d Danijel,12,5
+
+        string qRegisterUser = @"
+        insert into character (name, skills, stamina) Values
+        (@name, @skills, @stamina);";
+        var cmd = db.CreateCommand(qRegisterUser);
+        cmd.Parameters.AddWithValue("name", name);
+        cmd.Parameters.AddWithValue("skills", skills);
+        cmd.Parameters.AddWithValue("stamina", stamina);
+        cmd.ExecuteNonQuery();
+    }
+    public void MoveTo(string body)
+    {
+        string[] parts = body.Split(",");
+        string name = parts[0];
+        int skills = Convert.ToInt32(parts[1]);
+        int stamina = Convert.ToInt32(parts[2]);
 
         //curl -X POST localhost:3000/register -d Danijel,12,5
 
@@ -60,7 +77,6 @@ public class Post(NpgsqlDataSource db)
         cmd.Parameters.AddWithValue("stamina", stamina);
         cmd.ExecuteNonQuery();
 
-        return character;
 
     }
 

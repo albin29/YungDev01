@@ -16,7 +16,7 @@ public class Get(HttpListenerResponse res, HttpListenerRequest req, NpgsqlDataSo
         var path = req.Url?.AbsolutePath;
         var lastPath = req.Url?.AbsolutePath.Split("/").Last();
 
-        if (path != null && path == "/users")
+        if (path != null && path == "/users/")
         {
             string result = string.Empty;
 
@@ -46,7 +46,7 @@ public class Get(HttpListenerResponse res, HttpListenerRequest req, NpgsqlDataSo
             string result = string.Empty;
 
             string qCharacter = $@"
-            SELECT id, name, stamina_cost, skill_point_reward 
+            SELECT id, name, stamina_cost, skill_point_award 
             FROM locations;";
 
             using var command = db.CreateCommand(qCharacter);

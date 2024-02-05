@@ -98,6 +98,10 @@ public class Table(NpgsqlDataSource db)
 
         await db.CreateCommand(qCharacterTable).ExecuteNonQueryAsync();
 
+        string qDropLocations = @"drop table if exists locations;";
+
+        await db.CreateCommand(qDropLocations).ExecuteNonQueryAsync();
+
         string qLocations = @"
         create table if not exists locations(
         id      serial      primary key,
@@ -109,6 +113,7 @@ public class Table(NpgsqlDataSource db)
 
         string qLocationInsertions = @"
         insert into locations (name, stamina_cost, skill_point_award) values
+        ('Home', 0, 0), 
         ('Marks House', 2, 1),
         ('Underground Study', 3, 5);";
 

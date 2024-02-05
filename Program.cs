@@ -61,7 +61,6 @@ void Router(HttpListenerContext context)
 
     switch (req.HttpMethod)
     {
-
         case ("GET"):
 
             byte[] buffer = Encoding.UTF8.GetBytes(get.GetMessage());
