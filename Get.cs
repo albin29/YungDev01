@@ -69,7 +69,7 @@ public class Get(HttpListenerResponse res, HttpListenerRequest req, NpgsqlDataSo
         }
         if (path != null && path == "/scoreboard")
         {
-            string result = "\u001b[91;1m*********** SCOREBOARD ***********\u001b[0m\n"; 
+            string result = "\u001b[91;1m************** SCOREBOARD **************\u001b[0m\n"; 
 
             string qCharacter = @"
             SELECT player_name, current_day, score 
@@ -83,7 +83,7 @@ public class Get(HttpListenerResponse res, HttpListenerRequest req, NpgsqlDataSo
             while (reader.Read())
             {
                 result += "[";
-                result += reader.GetString(0).PadRight(10); 
+                result += reader.GetString(0).PadRight(11); 
                 result += "] Days: ";
                 result += reader.GetInt32(1).ToString().PadLeft(5);
                 result += " | Score: ";
