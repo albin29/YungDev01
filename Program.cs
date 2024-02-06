@@ -2,6 +2,7 @@ using Microsoft.VisualBasic;
 using System;
 using System.Net;
 using System.Text;
+using YungDev01;
 
 ControlC();
 
@@ -9,7 +10,7 @@ int port = 3000;
 bool listen = true;
 
 HttpListener listener = new();
-listener.Prefixes.Add($"https://localhost:{port}/");
+listener.Prefixes.Add($"http://localhost:{port}/");
 Console.WriteLine("Server is running...");
 try
 {
@@ -32,13 +33,14 @@ void Router(HttpListenerContext context)
     switch (request.HttpMethod, request.Url?.AbsolutePath)
     {
         case ("GET", "/"):
-            RootGet(response);
+            Get getter = new Get(response);
+            getter.GetMethod();
             break;
         case ("POST", "/"):
             RootPost(request, response);
             break;
         default:
-            NotFound(response);
+            //NotFound(response);
             break;
 
             
@@ -56,16 +58,7 @@ void RootPost(HttpListenerRequest req, HttpListenerResponse res)
     res.StatusCode = (int)HttpStatusCode.Created;
     res.Close();
 }
-void RootGet(HttpListenerResponse response)
-{
-    string message = "connection successful";
-    byte[] buffer = Encoding.UTF8.GetBytes(message);
-    response.ContentType = "text/plain";
-    response.StatusCode = (int)HttpStatusCode.OK;
 
-    response.OutputStream.Write(buffer, 0, buffer.Length);
-    response.OutputStream.Close();
-}
 void HandleRequest(IAsyncResult result)
 {
     if (result.AsyncState is HttpListener listener)
@@ -78,12 +71,13 @@ void HandleRequest(IAsyncResult result)
     }
 }
 
+/*
 void NotFound(HttpListenerResponse res)
 {
     res.StatusCode = (int)HttpStatusCode.NotFound;
     res.Close();
 }
-
+*/
 void ControlC()
 {
     Console.CancelKeyPress += delegate (object? sender, ConsoleCancelEventArgs e)
