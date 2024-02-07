@@ -34,24 +34,30 @@ finally
 
 void Router(HttpListenerContext context)
 {
-    HttpListenerRequest request = context.Request;
-    HttpListenerResponse response = context.Response;
+    HttpListenerRequest req = context.Request;
+    HttpListenerResponse res = context.Response;
 
-    Post poster = new Post(db);
-    Get getter = new Get(response, request, db);
+    Post poster = new Post(db, req, res);
+    Get getter = new Get(req, db);
 
-    switch (request.HttpMethod)
+    switch (req.HttpMethod)
     {
         case ("GET"):
             byte[] buffer = Encoding.UTF8.GetBytes(getter.GetCommand());
-            response.ContentType = "text/plain";
-            response.StatusCode = (int)HttpStatusCode.OK;
+            res.ContentType = "text/plain";
+            res.StatusCode = (int)HttpStatusCode.OK;
 
-            response.OutputStream.Write(buffer, 0, buffer.Length);
-            response.OutputStream.Close();
+            res.OutputStream.Write(buffer, 0, buffer.Length);
+            res.OutputStream.Close();
             break;
         case ("POST"):
-            poster.Commands(request, response);
+            StreamReader reader = new(req.InputStream, req.ContentEncoding);
+            string body = reader.ReadToEnd();
+
+            poster.Commands(body);
+
+            res.StatusCode = (int)HttpStatusCode.Created;
+            res.Close();
             break;
         default:
             //NotFound(response);

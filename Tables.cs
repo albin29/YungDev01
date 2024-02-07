@@ -35,7 +35,7 @@ public class Table(NpgsqlDataSource db)
                 location_id     int         references locations(id));";
 
         string highscore = @"
-                 create table if not exists highscore (
+                create table if not exists highscore (
                 id              serial      primary key,
                 player_name     text        references players(name),
                 points          int);";
