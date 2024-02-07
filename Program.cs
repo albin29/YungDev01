@@ -34,11 +34,13 @@ finally
 
 void Router(HttpListenerContext context)
 {
+
     HttpListenerRequest req = context.Request;
     HttpListenerResponse res = context.Response;
 
     Post poster = new Post(db, req);
     Get getter = new Get(req, db);
+
 
     switch (req.HttpMethod)
     {
