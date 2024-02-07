@@ -8,34 +8,28 @@ using Npgsql;
 
 namespace YungDev01;
 
-public class Post(NpgsqlDataSource db)
+public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResponse res)
 {
     // add comands here that will post something to the database
 
 
-    public void Commands(HttpListenerRequest req, HttpListenerResponse res)
+    public void Commands(string body)
     {
         string? path = req.Url?.AbsolutePath;
         string? lastPath = req.Url?.AbsolutePath.Split("/").Last();
         
-
         if (path != null && path.Contains("register"))
         {
             //add logic
-            StreamReader reader = new(req.InputStream, req.ContentEncoding);
-            string body = reader.ReadToEnd();
+
             Console.WriteLine($"Registered the following {body}");
-            res.StatusCode = (int)HttpStatusCode.Created;
-            res.Close();
+            
         }
         if (path != null && path.Contains("moveto"))
         {
             //add logic
-            StreamReader reader = new(req.InputStream, req.ContentEncoding);
-            string body = reader.ReadToEnd();
+
             Console.WriteLine($"Registered the following {body}");
-            res.StatusCode = (int)HttpStatusCode.Created;
-            res.Close();
         }
     }
 }
