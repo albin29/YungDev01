@@ -17,6 +17,7 @@ public class Post(NpgsqlDataSource db)
     {
         string? path = req.Url?.AbsolutePath;
         string? lastPath = req.Url?.AbsolutePath.Split("/").Last();
+        
 
         if (path != null && path.Contains("register"))
         {
@@ -24,6 +25,8 @@ public class Post(NpgsqlDataSource db)
             StreamReader reader = new(req.InputStream, req.ContentEncoding);
             string body = reader.ReadToEnd();
             Console.WriteLine($"Registered the following {body}");
+            res.StatusCode = (int)HttpStatusCode.Created;
+            res.Close();
         }
         if (path != null && path.Contains("moveto"))
         {
@@ -31,6 +34,8 @@ public class Post(NpgsqlDataSource db)
             StreamReader reader = new(req.InputStream, req.ContentEncoding);
             string body = reader.ReadToEnd();
             Console.WriteLine($"Registered the following {body}");
+            res.StatusCode = (int)HttpStatusCode.Created;
+            res.Close();
         }
     }
 }

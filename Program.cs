@@ -37,13 +37,13 @@ void Router(HttpListenerContext context)
     
     
 
-    switch (request.HttpMethod, request.Url?.AbsolutePath)
+    switch (request.HttpMethod)
     {
-        case ("GET", "/"):
+        case ("GET"):
             Get getter = new Get(response, request, db);
             getter.GetMethod();
             break;
-        case ("POST", "/"):
+        case ("POST"):
             Post poster = new Post(db);
             poster.Commands(request, response);
             break;
