@@ -19,7 +19,7 @@ public class Get (HttpListenerResponse res, HttpListenerRequest req, NpgsqlDataS
         var lastPath = req.Url?.AbsolutePath.Split("/").Last();
         string result = string.Empty;
 
-        if (path != null && path == "/users")
+        if (path != null && path == "users/")
         {
             //add logic
         }

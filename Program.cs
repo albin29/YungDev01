@@ -44,7 +44,8 @@ void Router(HttpListenerContext context)
             getter.GetMethod();
             break;
         case ("POST", "/"):
-            RootPost(request, response);
+            Post poster = new Post(db);
+            poster.Commands(request, response);
             break;
         default:
             //NotFound(response);
@@ -53,16 +54,7 @@ void Router(HttpListenerContext context)
 }
 
 
-void RootPost(HttpListenerRequest req, HttpListenerResponse res)
-{
-    StreamReader reader = new(req.InputStream, req.ContentEncoding);
-    string body = reader.ReadToEnd();
 
-    Console.WriteLine($"Registered the following {body}");
-
-    res.StatusCode = (int)HttpStatusCode.Created;
-    res.Close();
-}
 
 void HandleRequest(IAsyncResult result)
 {
