@@ -9,18 +9,19 @@ using Npgsql;
 
 namespace YungDev01;
 
-public class Get (HttpListenerResponse response)
+public class Get (HttpListenerResponse res, HttpListenerRequest req, NpgsqlDataSource db)
 {
+    
     public void GetMethod()
     {
         string message = @"
                         connection successful
-";
+                        ";
         byte[] buffer = Encoding.UTF8.GetBytes(message);
-        response.ContentType = "text/plain";
-        response.StatusCode = (int)HttpStatusCode.OK;
+        res.ContentType = "text/plain";
+        res.StatusCode = (int)HttpStatusCode.OK;
 
-        response.OutputStream.Write(buffer, 0, buffer.Length);
-        response.OutputStream.Close();
+        res.OutputStream.Write(buffer, 0, buffer.Length);
+        res.OutputStream.Close();
     }
 }

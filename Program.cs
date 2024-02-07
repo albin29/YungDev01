@@ -3,11 +3,16 @@ using System;
 using System.Net;
 using System.Text;
 using YungDev01;
+using Npgsql;
 
 ControlC();
 
 int port = 3000;
 bool listen = true;
+
+string dbUri = "Host=localhost;Port=5455;Username=postgres;Password=postgres;Database=YungDev";
+
+await using var db = NpgsqlDataSource.Create(dbUri);
 
 HttpListener listener = new();
 listener.Prefixes.Add($"http://localhost:{port}/");
@@ -29,11 +34,13 @@ void Router(HttpListenerContext context)
 {
     HttpListenerRequest request = context.Request;
     HttpListenerResponse response = context.Response;
+    
+    
 
     switch (request.HttpMethod, request.Url?.AbsolutePath)
     {
         case ("GET", "/"):
-            Get getter = new Get(response);
+            Get getter = new Get(response, request, db);
             getter.GetMethod();
             break;
         case ("POST", "/"):
@@ -41,9 +48,7 @@ void Router(HttpListenerContext context)
             break;
         default:
             //NotFound(response);
-            break;
-
-            
+            break;   
     }
 }
 
@@ -53,7 +58,7 @@ void RootPost(HttpListenerRequest req, HttpListenerResponse res)
     StreamReader reader = new(req.InputStream, req.ContentEncoding);
     string body = reader.ReadToEnd();
 
-    Console.WriteLine($"Created the following in db: {body}");
+    Console.WriteLine($"Registered the following {body}");
 
     res.StatusCode = (int)HttpStatusCode.Created;
     res.Close();
