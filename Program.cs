@@ -16,10 +16,6 @@ ControlC();
 int port = 3000;
 bool listen = true;
 
-string dbUri = "Host=localhost;Port=5455;Username=postgres;Password=postgres;Database=YungDev";
-
-await using var db = NpgsqlDataSource.Create(dbUri);
-
 HttpListener listener = new();
 listener.Prefixes.Add($"http://localhost:{port}/");
 Console.WriteLine("Server is running...");
