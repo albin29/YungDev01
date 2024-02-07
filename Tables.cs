@@ -53,7 +53,7 @@ public class Table(NpgsqlDataSource db)
 
         await db.CreateCommand(locationsInsertions).ExecuteNonQueryAsync();
 
-        /*
+        
         string view = @"CREATE OR REPLACE FUNCTION insert_into_highscore()
             RETURNS TRIGGER AS $$
             BEGIN
@@ -91,6 +91,6 @@ public class Table(NpgsqlDataSource db)
             EXECUTE FUNCTION insert_into_highscore();";
 
         await db.CreateCommand(view).ExecuteNonQueryAsync();
-        */
+        
     }
 }

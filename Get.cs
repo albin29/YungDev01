@@ -22,12 +22,32 @@ public class Get(HttpListenerRequest req, NpgsqlDataSource db)
         if (path != null && path == "users")
         {
             //add logic
+            return result;
         }
         if (path != null && path == "scoreboard")
         {
+            string qScoreBoard = @"
+            select id, player_name, points 
+            from highscore order by points desc;";
 
+            using var command = db.CreateCommand(qScoreBoard);
+            var reader = command.ExecuteReader();
 
-            string qScoreBoard = "";
+            while (reader.Read())
+            {
+                result += "[Id: ";
+                result += reader.GetInt32(0);
+                result += "] ";
+                result += "[Name: ";
+                result += reader.GetString(1);
+                result += "] ";
+                result += "[Points: ";
+                result += reader.GetInt32(2);
+                result += "]";
+                result += "\n";
+            }
+            return result;
+
         }
         return result;
     }
