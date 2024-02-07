@@ -14,18 +14,52 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req)
     {
         string? path = req.Url?.AbsolutePath;
         string? lastPath = req.Url?.AbsolutePath.Split("/").Last();
-        
-        if (path != null && path.Contains("register"))
+        if (path != null)
         {
-            PlayerRegister(body);
-            Console.WriteLine($"Registered the following {body}");
+            if (path.Contains("register"))
+            {
+                PlayerRegister(body);
+                Console.WriteLine($"Registered the following {body}");
+            }
+            if (path.Contains("sleep"))
+            {
+                Sleep(body);
+                Console.WriteLine($"Registered the following {body}");
+            }
+            if (path.Contains("moveto"))
+            {
+                Console.WriteLine($"Registered the following {body}");
+            }
         }
-        if (path != null && path.Contains("moveto"))
-        {
-            //add logic
 
-            Console.WriteLine($"Registered the following {body}");
-        }
+    }
+
+    public void Sleep(string body)
+    {
+        string qGetCurrentDay = @"
+        SELECT day
+        FROM players
+        WHERE id = @player_id;
+        ";
+
+        using var command2 = db.CreateCommand(qGetCurrentDay);
+        command2.Parameters.AddWithValue("player_id", Convert.ToInt32(body));
+        var reader = command2.ExecuteReader();
+        int stamina = 5, day = 0;
+
+        while (reader.Read()) { day = reader.GetInt32(0); }
+
+        string qUpdatePlayer = @"
+        UPDATE players
+        SET day = @day, stamina = @stamina
+        WHERE id = @player_id;
+        ";
+
+        using var command = db.CreateCommand(qUpdatePlayer);
+        command.Parameters.AddWithValue("player_id", Convert.ToInt32(body));
+        command.Parameters.AddWithValue("day", day + 1);
+        command.Parameters.AddWithValue("stamina", stamina);
+        command.ExecuteNonQuery();
     }
     public void PlayerRegister(string body)
     {
