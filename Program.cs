@@ -5,6 +5,12 @@ using System.Text;
 using YungDev01;
 using Npgsql;
 
+string dbUri = "Host=localhost;Port=5455;Username=postgres;Password=postgres;Database=YungDev";
+await using var db = NpgsqlDataSource.Create(dbUri);
+
+Table table = new Table(db);
+await table.CreateTable();
+
 ControlC();
 
 int port = 3000;
