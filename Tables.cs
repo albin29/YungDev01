@@ -12,11 +12,8 @@ public class Table(NpgsqlDataSource db)
 {
     public async Task CreateTable()
     {
-        string dbUri = "Host=localhost;Port=5455;Username=postgres;Password=postgres;Database=YungDev";
-        await using var db = NpgsqlDataSource.Create(dbUri);
 
         await db.CreateCommand("DROP TABLE IF EXISTS locations cascade").ExecuteNonQueryAsync();
-        await db.CreateCommand("DROP TABLE IF EXISTS players CASCADE").ExecuteNonQueryAsync();
         await db.CreateCommand("DROP TABLE IF EXISTS highscore CASCADE").ExecuteNonQueryAsync();
 
         string locations = @"
