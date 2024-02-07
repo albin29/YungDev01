@@ -23,6 +23,12 @@ public class Get(HttpListenerRequest req, NpgsqlDataSource db)
         {
             //add logic
         }
+        if (path != null && path == "scoreboard")
+        {
+
+
+            string qScoreBoard = "";
+        }
         return result;
     }
 
