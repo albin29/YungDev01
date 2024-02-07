@@ -10,7 +10,7 @@ using System.Reflection.Metadata.Ecma335;
 
 namespace YungDev01;
 
-public class Get(HttpListenerResponse res, HttpListenerRequest req, NpgsqlDataSource db)
+public class Get(HttpListenerRequest req, NpgsqlDataSource db)
 {
 
     public string GetCommand()
@@ -19,7 +19,7 @@ public class Get(HttpListenerResponse res, HttpListenerRequest req, NpgsqlDataSo
         var lastPath = req.Url?.AbsolutePath.Split("/").Last();
         string result = string.Empty;
 
-        if (path != null && path == "users/")
+        if (path != null && path == "users")
         {
             //add logic
         }
