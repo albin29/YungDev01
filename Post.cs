@@ -10,8 +10,31 @@ namespace YungDev01;
 
 public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResponse res)
 {
-    // add comands here that will post something to the database
+    public void CharacterRegister(string body)
+    {
+        int stamina = 5;
+        int skills = 0;
+        int money = 100;
+        int day = 1;
+        int location_id = 1;
+        string[] fields = body.Split(',');
+        string name = fields[0];
+        string password = fields[1];
 
+        string qRegisterUser = @"
+        insert into players (name,password,stamina,skills,money,day,location_id) Values
+        (@name,@password,@stamina,@skills,@money,@day,@location_id);";
+
+        var cmd = db.CreateCommand(qRegisterUser);
+        cmd.Parameters.AddWithValue("name", name);
+        cmd.Parameters.AddWithValue("password", password);
+        cmd.Parameters.AddWithValue("stamina", stamina);
+        cmd.Parameters.AddWithValue("skills", skills);
+        cmd.Parameters.AddWithValue("money", money);
+        cmd.Parameters.AddWithValue("day", day);
+        cmd.Parameters.AddWithValue("location_id", location_id);
+        cmd.ExecuteNonQuery();
+    }
 
     public void Commands(string body)
     {
@@ -20,8 +43,8 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
         
         if (path != null && path.Contains("register"))
         {
-            //add logic
 
+            CharacterRegister(body);
             Console.WriteLine($"Registered the following {body}");
             
         }
