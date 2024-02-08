@@ -75,23 +75,28 @@ public class Table(NpgsqlDataSource db)
         await db.CreateCommand(triggerSQL).ExecuteNonQueryAsync();
 
         string sql = @"
-                CREATE OR REPLACE FUNCTION update_highscore()
-                RETURNS TRIGGER AS $$
-                BEGIN
-                    -- Check if the player already exists in the highscore table
-                    IF NOT EXISTS (
-                        SELECT 1 FROM highscore WHERE player_name = NEW.name
-                    ) THEN
-                        -- Insert the new player into the highscore table
-                        INSERT INTO highscore (player_name, points) VALUES (NEW.name, NEW.points);
-                    END IF;
-                    RETURN NULL;
-                END;
-                $$ LANGUAGE plpgsql;
+                        CREATE OR REPLACE FUNCTION update_highscore()
+            RETURNS TRIGGER AS $$
+            BEGIN
+                -- Check if the player already exists in the highscore table
+                IF NOT EXISTS (
+                    SELECT 1 FROM highscore WHERE player_name = NEW.name
+                ) THEN
+                    -- Insert the new player into the highscore table
+                    INSERT INTO highscore (player_name, points) VALUES (NEW.name, NEW.points);
+                ELSE
+                    -- If the player already exists, update the score if the new score is higher
+                    UPDATE highscore
+                    SET points = NEW.points
+                    WHERE player_name = NEW.name AND points < NEW.points;
+                END IF;
+                RETURN NULL;
+            END;
+            $$ LANGUAGE plpgsql;
 
-                CREATE TRIGGER highscore_trigger
-                AFTER INSERT ON players
-                FOR EACH ROW EXECUTE FUNCTION update_highscore();";
+        CREATE TRIGGER highscore_trigger
+        AFTER INSERT OR UPDATE ON players
+        FOR EACH ROW EXECUTE FUNCTION update_highscore();";
 
         await db.CreateCommand(sql).ExecuteNonQueryAsync();
 
