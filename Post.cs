@@ -25,6 +25,16 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req)
             {
                 Sleep(body);
                 Console.WriteLine($"Registered the following {body}");
+
+                RandomEventGenerator randomEvent = new(db, body);
+                Random random = new();
+                int result = random.Next(1, 3);
+
+                if (result == 1)
+                {
+                    
+                }
+
             }
             if (path.Contains("moveto"))
             {
@@ -60,6 +70,7 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req)
         command.Parameters.AddWithValue("day", day + 1);
         command.Parameters.AddWithValue("stamina", stamina);
         command.ExecuteNonQuery();
+
     }
     public void PlayerRegister(string body)
     {
