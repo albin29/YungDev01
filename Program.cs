@@ -38,7 +38,7 @@ void Router(HttpListenerContext context)
     HttpListenerRequest req = context.Request;
     HttpListenerResponse res = context.Response;
 
-    Post poster = new Post(db, req);
+    Post poster = new Post(db, req, res);
     Get getter = new Get(req, db);
 
 
