@@ -10,7 +10,7 @@ namespace YungDev01;
 public class RandomEventGenerator(NpgsqlDataSource db, string body)
 {
 
-    public void Event()
+    public string Event()
     {
 
         Random random = new();
@@ -24,6 +24,9 @@ public class RandomEventGenerator(NpgsqlDataSource db, string body)
 
             using var command = db.CreateCommand(qFeelingSick);
             command.Parameters.AddWithValue("player_id", Convert.ToInt32(body));
+            command.ExecuteNonQuery();
+
+            return "***EVENT TRIGGERED***\n\nYou are feeling sick today and are gonna have to stay in..\n* -5 Stamina";
         }
 
         if (roll == 2 || roll == 3)
@@ -35,6 +38,9 @@ public class RandomEventGenerator(NpgsqlDataSource db, string body)
 
             using var command = db.CreateCommand(qBadSleep);
             command.Parameters.AddWithValue("player_id", Convert.ToInt32(body));
+            command.ExecuteNonQuery();
+
+            return "***EVENT TRIGGERED***\n\nYou didnt sleep great tonight..\n* -1 Stamina";
         }
         if (roll == 4 || roll == 5)
         {
@@ -45,6 +51,9 @@ public class RandomEventGenerator(NpgsqlDataSource db, string body)
 
             using var command = db.CreateCommand(qGoodSleep);
             command.Parameters.AddWithValue("player_id", Convert.ToInt32(body));
+            command.ExecuteNonQuery();
+
+            return "***EVENT TRIGGERED***\n\nYou had an awesome night of sleep!\n* +5 Stamina";
         }
         if (roll == 19)
         {
@@ -55,6 +64,9 @@ public class RandomEventGenerator(NpgsqlDataSource db, string body)
 
             using var command = db.CreateCommand(qGoodSleep);
             command.Parameters.AddWithValue("player_id", Convert.ToInt32(body));
+            command.ExecuteNonQuery();
+
+            return "***EVENT TRIGGERED***\nYou are feeling sick today and are gonna have to stay in..\n* -5 Stamina";
         }
         if (roll == 19)
         {
@@ -65,8 +77,8 @@ public class RandomEventGenerator(NpgsqlDataSource db, string body)
 
             using var command = db.CreateCommand(qGoodSleep);
             command.Parameters.AddWithValue("player_id", Convert.ToInt32(body));
+            command.ExecuteNonQuery();
         }
-
-
+        return "";
     }
 }
