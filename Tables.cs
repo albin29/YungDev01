@@ -65,7 +65,7 @@ public class Table(NpgsqlDataSource db)
                 END;
                 $$ LANGUAGE plpgsql;
 
-                CREATE TRIGGER update_points_trigger
+                CREATE OR REPLACE TRIGGER update_points_trigger
                 BEFORE INSERT OR UPDATE ON players
                 FOR EACH ROW
                 EXECUTE FUNCTION calculate_points();
@@ -93,7 +93,7 @@ public class Table(NpgsqlDataSource db)
             END;
             $$ LANGUAGE plpgsql;
 
-        CREATE TRIGGER highscore_trigger
+        CREATE OR REPLACE TRIGGER highscore_trigger
         AFTER INSERT OR UPDATE ON players
         FOR EACH ROW EXECUTE FUNCTION update_highscore();";
 
