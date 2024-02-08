@@ -36,20 +36,17 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req)
     public void MoveTo(string body)
     {
         string qGetCurrentStamina = @"
-        SELECT locations.stamina_cost, players.stamina
-        FROM locations
-        JOIN players ON locations.id = players.location_id
-        WHERE players.id = @player_id;
-        ";
-
-        using var command = db.CreateCommand(qGetCurrentStamina);
-
+    SELECT locations.stamina_cost, players.stamina
+    FROM locations
+    JOIN players ON locations.id = @test
+    WHERE players.id = @player_id;
+    ";
         string[] fields = body.Split(",");
         int id = Convert.ToInt32(fields[0]), location = Convert.ToInt32(fields[1]);
 
+        using var command = db.CreateCommand(qGetCurrentStamina);
         command.Parameters.AddWithValue("player_id", id);
-        command.Parameters.AddWithValue("location_id", location);
-
+        command.Parameters.AddWithValue("test",location);
         var reader = command.ExecuteReader();
         int currentStamina = 0;
         int staminaCost = 0;
@@ -58,17 +55,19 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req)
             staminaCost = reader.GetInt32(0);
             currentStamina = reader.GetInt32(1);
         }
-
-        if (currentStamina > staminaCost)
+        if (currentStamina >= staminaCost) 
         {
+            int newStamina = currentStamina - staminaCost;
             string updatePlayerLocation = @"
-                update players
-                set location_id = @location
-                where id = @player_id;";
+        UPDATE players
+        SET location_id = @location,
+            stamina = @newStamina
+        WHERE id = @player_id;";
 
             using var cmd = db.CreateCommand(updatePlayerLocation);
             cmd.Parameters.AddWithValue("player_id", id);
             cmd.Parameters.AddWithValue("location", location);
+            cmd.Parameters.AddWithValue("newStamina", newStamina);
             cmd.ExecuteNonQuery();
         }
         else
@@ -76,6 +75,7 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req)
             Console.WriteLine("Not enough stamina");
         }
     }
+
     public void Sleep(string body)
     {
         string qGetCurrentDay = @"
