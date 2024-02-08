@@ -32,26 +32,49 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req)
                 MoveTo(body);
             }
         }
-
     }
     public void MoveTo(string body)
     {
-        string updatePlayerLocation = @"
-        update players
-        set location_id = @location
-        where id = @playerId;";
-       
-        using var command = db.CreateCommand(updatePlayerLocation);
+        string qGetCurrentStamina = @"
+        SELECT locations.stamina_cost, players.stamina
+        FROM locations
+        JOIN players ON locations.id = players.location_id
+        WHERE players.id = @player_id;
+        ";
 
-        string[] fields = body.Split(',');
-        string playerId = fields[0], location = fields[1];
+        using var command = db.CreateCommand(qGetCurrentStamina);
 
-        command.Parameters.AddWithValue("playerId", Convert.ToInt32(playerId));
-        command.Parameters.AddWithValue("location", Convert.ToInt32(location));
-        command.ExecuteNonQuery();
+        string[] fields = body.Split(",");
+        int id = Convert.ToInt32(fields[0]), location = Convert.ToInt32(fields[1]);
 
+        command.Parameters.AddWithValue("player_id", id);
+        command.Parameters.AddWithValue("location_id", location);
 
+        var reader = command.ExecuteReader();
+        int currentStamina = 0;
+        int staminaCost = 0;
+        while (reader.Read())
+        {
+            staminaCost = reader.GetInt32(0);
+            currentStamina = reader.GetInt32(1);
+        }
 
+        if (currentStamina > staminaCost)
+        {
+            string updatePlayerLocation = @"
+                update players
+                set location_id = @location
+                where id = @player_id;";
+
+            using var cmd = db.CreateCommand(updatePlayerLocation);
+            cmd.Parameters.AddWithValue("player_id", id);
+            cmd.Parameters.AddWithValue("location", location);
+            cmd.ExecuteNonQuery();
+        }
+        else
+        {
+            Console.WriteLine("Not enough stamina");
+        }
     }
     public void Sleep(string body)
     {
@@ -99,4 +122,5 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req)
         cmd.Parameters.AddWithValue("location_id", location_id);
         cmd.ExecuteNonQuery();
     }
+
 }
