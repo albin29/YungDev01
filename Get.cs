@@ -27,6 +27,7 @@ public class Get(HttpListenerRequest req, NpgsqlDataSource db)
         return result;
 
     }
+
     public string ShowPlayer(string result)
     {
         NpgsqlCommand? command;

@@ -29,11 +29,30 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req)
             if (path.Contains("moveto"))
             {
                 Console.WriteLine($"Registered the following {body}");
+                MoveTo(body);
             }
         }
 
     }
+    public void MoveTo(string body)
+    {
+        string updatePlayerLocation = @"
+        update players
+        set location_id = @location
+        where id = @playerId;";
+       
+        using var command = db.CreateCommand(updatePlayerLocation);
 
+        string[] fields = body.Split(',');
+        string playerId = fields[0], location = fields[1];
+
+        command.Parameters.AddWithValue("playerId", Convert.ToInt32(playerId));
+        command.Parameters.AddWithValue("location", Convert.ToInt32(location));
+        command.ExecuteNonQuery();
+
+
+
+    }
     public void Sleep(string body)
     {
         string qGetCurrentDay = @"
