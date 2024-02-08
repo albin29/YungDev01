@@ -8,7 +8,7 @@ using Npgsql;
 
 namespace YungDev01;
 
-public class Post(NpgsqlDataSource db, HttpListenerRequest req)
+public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResponse res)
 {
     public void Commands(string body)
     {
@@ -32,7 +32,12 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req)
 
                 if (result == 1)
                 {
-                    
+                    ClientResponse(res, randomEvent.Event());
+                }
+
+                else
+                {
+                    ClientResponse(res, "No event was triggered..\n");
                 }
 
             }
@@ -97,7 +102,6 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req)
         res.StatusCode = 400; // Bad Request
         byte[] buffer = Encoding.UTF8.GetBytes(errorMessage);
         res.OutputStream.Write(buffer, 0, buffer.Length);
-        res.Close();
     }
 
     private void ClientResponse(HttpListenerResponse res, string successMessage)
@@ -105,6 +109,5 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req)
         res.StatusCode = 200; // OK
         byte[] buffer = Encoding.UTF8.GetBytes(successMessage);
         res.OutputStream.Write(buffer, 0, buffer.Length);
-        res.Close();
     }
 }
