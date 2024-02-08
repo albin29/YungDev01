@@ -14,7 +14,7 @@ public class RandomEventGenerator(NpgsqlDataSource db, string body)
     {
 
         Random random = new();
-        int roll = random.Next(1, 10);
+        int roll = random.Next(1, 6);
         if (roll == 1)
         {
             string qFeelingSick = @"

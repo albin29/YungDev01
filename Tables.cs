@@ -12,7 +12,6 @@ public class Table(NpgsqlDataSource db)
 {
     public async Task CreateTable()
     {
-        await db.CreateCommand("DROP TABLE IF EXISTS players cascade").ExecuteNonQueryAsync();
         await db.CreateCommand("DROP TABLE IF EXISTS locations cascade").ExecuteNonQueryAsync();
         await db.CreateCommand("DROP TABLE IF EXISTS highscore CASCADE").ExecuteNonQueryAsync();
 
