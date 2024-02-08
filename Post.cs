@@ -103,11 +103,17 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
             ErrorResponse(res, "enter a number from 1 and up , try a lower number if the target number dont exist");
             return;
         }
-        
+
+        int playerStamina = StaminaCheck(hackerId);
+        if (playerStamina < 1)
+        {
+            ErrorResponse(res,"Not enough stamina to execute hack! sleep to recover stamina" );
+            return;
+        }
         HackResult(hackerId, res);
 
-        string output = $"player {hackerId} succesfully hacked player {targetId}";
-        ClientResponse(res, output);
+        
+        ClientResponse(res, $"player {hackerId} succesfully hacked player {targetId}");
 
 
     }
@@ -150,9 +156,21 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
 
             if (rowchanged == 0)
             {
-                ErrorResponse(res, "To low on stamina to execute hack! Go sleep, See you another day!");
+                ErrorResponse(res, "Hack did not execute, No update was made.");
             }
 
+        }
+    }
+
+    private int StaminaCheck(int hackerId)
+    {
+        string qStaminacheck = @"SELECT stamina FROM players WHERE id = @playerId";
+        using (var cmd = db.CreateCommand())
+        {
+            cmd.CommandText = qStaminacheck;
+            cmd.Parameters.AddWithValue("@playerId", hackerId);
+            object result = cmd.ExecuteScalar();
+            return result != DBNull.Value ? Convert.ToInt32(result) : 0;
         }
     }
 
@@ -161,7 +179,7 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
         res.StatusCode = 400; // Bad Request
         byte[] buffer = Encoding.UTF8.GetBytes(errorMessage);
         res.OutputStream.Write(buffer, 0, buffer.Length);
-        res.Close();
+        
     }
 
     private void ClientResponse(HttpListenerResponse res, string successMessage)
@@ -169,16 +187,8 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
         res.StatusCode = 200; // OK
         byte[] buffer = Encoding.UTF8.GetBytes(successMessage);
         res.OutputStream.Write(buffer, 0, buffer.Length);
-        res.Close();
+        
     }
 
-    private void GoToSchool(int playerId, HttpListenerResponse res)
-    {
-        Random rnd = new Random();
-        int staminacost = 2;
-        int skillreward = rnd.Next(1, 11);
-
-
-    }
-    
+     
 }
