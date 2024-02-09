@@ -114,7 +114,7 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
     public void Study(string body)
     {
         string qGetCurrentStamina = @"
-        SELECT study_spot.stamina_cost, players.stamina
+        SELECT study_spot.stamina_cost, study_spot.skill_award, players.stamina , players.skills
         FROM study_spot
         CROSS JOIN players
         WHERE study_spot.id = @study_spot_id AND players.id = @player_id;";
@@ -126,24 +126,27 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
         command.Parameters.AddWithValue("player_id", id);
         command.Parameters.AddWithValue("study_spot_id", studySpot);
         var reader = command.ExecuteReader();
-        int currentStamina = 0;
-        int staminaCost = 0;
+        int currentStamina = 0, skillAward = 0, staminaCost = 0, currentSkill = 0;
         while (reader.Read())
         {
             staminaCost = reader.GetInt32(0);
-            currentStamina = reader.GetInt32(1);
+            skillAward = reader.GetInt32(1);
+            currentStamina = reader.GetInt32(2);
+            currentSkill = reader.GetInt32(3);
         }
         if (currentStamina >= staminaCost)
         {
             int newStamina = currentStamina - staminaCost;
+            int newSkill = skillAward + currentSkill;
             string updatePlayerLocation = @"
             UPDATE players
-            set stamina = @newStamina
+            set stamina = @newStamina, skills = @newSkill
             WHERE id = @player_id;";
 
             using var cmd = db.CreateCommand(updatePlayerLocation);
             cmd.Parameters.AddWithValue("player_id", id);
             cmd.Parameters.AddWithValue("newStamina", newStamina);
+            cmd.Parameters.AddWithValue("newSkill", newSkill);
             cmd.ExecuteNonQuery();
         }
         else
