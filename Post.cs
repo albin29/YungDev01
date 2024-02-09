@@ -230,62 +230,40 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
             ErrorResponse(res,"Not enough stamina to execute hack! sleep to recover stamina" );
             return;
         }
-        HackResult(hackerId, targetId, res);
+        HackResult(hackerId, res);
 
         ClientResponse(res, $"player {hackerId} succesfully hacked player {targetId}");
     }
-    private bool PlayerCheck(int hackerId)
-
+    private bool PlayerCheck(int playerid)
     {
         string qPlayercheck = @"SELECT COUNT(*) FROM players WHERE id = @playerId";
 
         using var cmd = db.CreateCommand(qPlayercheck);
-        cmd.Parameters.AddWithValue("@playerId", hackerId);
+        cmd.Parameters.AddWithValue("@playerId", playerid);
         var result = cmd.ExecuteScalar();
         return Convert.ToInt32(result) > 0;
     }
-    private void HackResult(int hackerId,int targetId, HttpListenerResponse res)
-
+    private void HackResult(int playerid, HttpListenerResponse res)
     {
         Random rnd = new Random();
-        int randomskill = rnd.Next(1, 5);
-        int randommoney = rnd.Next(0, 11);
+        int randomskill = rnd.Next(3, 11);
+        int randommoney = rnd.Next(0, 101);
         int staminacost = 1;
-
-        string qTargetresult = @"UPDATE players SET
-        skills = GREATEST(skills - @randomskill ,0),
-        money = GREATEST(skills - @randommoney , 0)
-        WHERE id = @targetId";
 
         string qHackresult = @"
         UPDATE players SET
         skills = skills + @randomskill,
         money = money + @randommoney,
         stamina = stamina - @staminacost
-        WHERE id = @hackerId AND stamina >= @staminacost
+        WHERE id = @playerid AND stamina >= @staminacost
         ";
-
-        using (var cmd = db.CreateCommand(qTargetresult))
-        {
-            cmd.Parameters.AddWithValue("@randomskill", randomskill);
-            cmd.Parameters.AddWithValue("@randommoney", randommoney);
-            cmd.Parameters.AddWithValue("@targetId", targetId);
-
-            int rowchang = cmd.ExecuteNonQuery();
-
-            if (rowchang == 0)
-            {
-                ErrorResponse(res, "Hack did not execute, No update was made.");
-            }
-
-        }
 
         using (var cmd = db.CreateCommand(qHackresult))
         {
             cmd.Parameters.AddWithValue("randomskill", randomskill);
             cmd.Parameters.AddWithValue("randommoney", randommoney);
             cmd.Parameters.AddWithValue("staminacost", staminacost);
-            cmd.Parameters.AddWithValue("hackerId", hackerId);
+            cmd.Parameters.AddWithValue("playerid", playerid);
 
             int rowchanged = cmd.ExecuteNonQuery();
 
@@ -293,8 +271,6 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
             {
                 ErrorResponse(res, "Hack did not execute, No update was made.");
             }
-
-            ClientResponse(res, $"  You earned {randomskill} Skillpoints and {randommoney} Gold  ");
 
         }
     }
