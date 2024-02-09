@@ -85,6 +85,7 @@ curl -X POST localhost:3000/moveto -d YourPlayerID,LocationID
         using var command = db.CreateCommand(qShop);
         var reader = command.ExecuteReader();
 
+        string result = string.Empty;
         while (reader.Read())
         {
             result += "[";
@@ -126,6 +127,7 @@ curl -X POST localhost:3000/moveto -d YourPlayerID,LocationID
         }
         var reader = command.ExecuteReader();
 
+        string result = string.Empty;
         while (reader.Read())
         {
             result += "[";
