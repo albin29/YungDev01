@@ -73,9 +73,40 @@ curl -X POST localhost:3000/moveto -d YourPlayerID,LocationID
             {
                 return GetMenu();
             }
+            if (path.Contains("/scoreboard"))
+            {
+                return Scoreboard();
+            }
+
         }
     return "Not Found";
     }
+
+    public string Scoreboard ()
+    {
+        string result = "\u001b[91;1m** SCOREBOARD **\u001b[0m\n";
+
+        string qCharacter = @"
+    SELECT player_name, points 
+    FROM highscore
+    ORDER BY points DESC;";
+
+
+        using var command = db.CreateCommand(qCharacter);
+        var reader = command.ExecuteReader();
+
+        while (reader.Read())
+        {
+            result += reader.GetString(0).PadRight(10);
+            result += " | Score: ";
+            result += reader.GetInt32(1).ToString().PadLeft(5);
+            result += "\n";
+
+        }
+        return result;
+
+    }
+
     public string Shop()
     {
         string qShop = @"
