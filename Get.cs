@@ -20,21 +20,52 @@ public class Get(HttpListenerRequest req, NpgsqlDataSource db)
     {
         string result = string.Empty;
 
-        if (path != null && path.Contains("/players"))
+        if (path != null)
         {
-            return ShowPlayer(result);
+            if (path.Contains("/players"))
+            {
+                return ShowPlayer(result);
+            }
+            if (path.Contains("/shop"))
+            {
+                return Shop(result);
+            }
         }
-        return result;
-
+        return "Not Found";
     }
 
+    public string Shop(string result)
+    {
+        string qShop = @"
+            SELECT id, name, skills_given, stamina_given, price
+            FROM shop
+            ";
+        using var command = db.CreateCommand(qShop);
+        var reader = command.ExecuteReader();
+
+        while (reader.Read())
+        {
+            result += "[";
+            result += reader.GetInt32(0);
+            result += ". ";
+            result += reader.GetString(1);
+            result += "] Skills Given: ";
+            result += reader.GetInt32(2);
+            result += " | Stamina Given: ";
+            result += reader.GetInt32(3);
+            result += " | Price: ";
+            result += reader.GetInt32(4);
+            result += "\n";
+        }
+        return result;
+    }
     public string ShowPlayer(string result)
     {
         NpgsqlCommand? command;
-        if (path != null && path.Contains("players/"))
+        if (path != null && lastPath != string.Empty && path.Contains("players/"))
         {
             string qPlayer = @"
-                SELECT id, name, password, stamina, skills, money, day, location_id
+                SELECT id, name, password, stamina, skills, money, day
                 FROM players
                 WHERE id = @player_id;
                 ";
@@ -44,7 +75,7 @@ public class Get(HttpListenerRequest req, NpgsqlDataSource db)
         else
         {
             string qAllPlayers = @"
-                SELECT id, name, password, stamina, skills, money, day, location_id
+                SELECT id, name, password, stamina, skills, money, day
                 FROM players
                 ORDER BY id ASC;
                 ";
@@ -66,8 +97,6 @@ public class Get(HttpListenerRequest req, NpgsqlDataSource db)
             result += reader.GetInt32(5);
             result += " | Day: ";
             result += reader.GetInt32(6);
-            result += " | Location ID: ";
-            result += reader.GetInt32(7);
             result += "\n";
         }
         return result;
