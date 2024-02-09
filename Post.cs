@@ -152,20 +152,20 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
         if (parts.Length < 2 || !int.TryParse(parts[0].Trim(), out int hackerId) ||
             !int.TryParse(parts[1].Trim(), out int targetId))
         {
-            ErrorResponse(res, "Enter only integers starting from 1");
+            ErrorResponse(res, "*  Enter only integers starting from 1");
             return;
         }
 
         if (!PlayerCheck(hackerId) || !PlayerCheck(targetId))
         {
-            ErrorResponse(res, "enter a number from 1 and up , try a lower number if the target number dont exist");
+            ErrorResponse(res, "*  enter a number from 1 and up , try a lower number if the target number dont exist");
             return;
         }
 
         int playerStamina = StaminaCheck(hackerId);
         if (playerStamina < 1)
         {
-            ErrorResponse(res,"Not enough stamina to execute hack! sleep to recover stamina" );
+            ErrorResponse(res, "*  Not enough stamina to execute hack! sleep to recover stamina" );
             return;
         }
         HackResult(hackerId, targetId, res);
@@ -221,7 +221,7 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
 
             if (rowchang == 0)
             {
-                ErrorResponse(res, "Hack did not execute, No update was made.");
+                ErrorResponse(res, "*  Hack did not execute, No update was made.");
             }
 
         }
@@ -237,10 +237,10 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
 
             if (rowchanged == 0)
             {
-                ErrorResponse(res, "Hack did not execute, No update was made.");
+                ErrorResponse(res, "*  Hack did not execute, No update was made.");
             }
 
-            ClientResponse(res, $"  You earned {randomskill} Skillpoints and {randommoney} Gold  ");
+            ClientResponse(res, $"*  You earned {randomskill} Skillpoints and {randommoney} Gold  ");
 
         }
     }
