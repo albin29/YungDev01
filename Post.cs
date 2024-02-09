@@ -8,7 +8,7 @@ using Npgsql;
 
 namespace YungDev01;
 
-public class Post(NpgsqlDataSource db, HttpListenerRequest req)
+public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResponse res)
 {
     public void Commands(string body)
     {
@@ -25,6 +25,21 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req)
             {
                 Sleep(body);
                 Console.WriteLine($"Registered the following {body}");
+
+                RandomEventGenerator randomEvent = new(db, body);
+                Random random = new();
+                int result = random.Next(1, 3);
+
+                if (result == 1)
+                {
+                    ClientResponse(res, randomEvent.Event());
+                }
+
+                else
+                {
+                    ClientResponse(res, "No event was triggered..\n");
+                }
+
             }
             if (path.Contains("moveto"))
             {
@@ -102,6 +117,7 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req)
         command.Parameters.AddWithValue("day", day + 1);
         command.Parameters.AddWithValue("stamina", stamina);
         command.ExecuteNonQuery();
+
     }
     public void PlayerRegister(string body)
     {
@@ -123,4 +139,18 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req)
         cmd.ExecuteNonQuery();
     }
 
+
+        private void ErrorResponse(HttpListenerResponse res, string errorMessage)
+    {
+        res.StatusCode = 400; // Bad Request
+        byte[] buffer = Encoding.UTF8.GetBytes(errorMessage);
+        res.OutputStream.Write(buffer, 0, buffer.Length);
+    }
+
+    private void ClientResponse(HttpListenerResponse res, string successMessage)
+    {
+        res.StatusCode = 200; // OK
+        byte[] buffer = Encoding.UTF8.GetBytes(successMessage);
+        res.OutputStream.Write(buffer, 0, buffer.Length);
+    }
 }

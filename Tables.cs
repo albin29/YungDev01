@@ -12,7 +12,6 @@ public class Table(NpgsqlDataSource db)
 {
     public async Task CreateTable()
     {
-
         await db.CreateCommand("DROP TABLE IF EXISTS locations cascade").ExecuteNonQueryAsync();
         await db.CreateCommand("DROP TABLE IF EXISTS highscore CASCADE").ExecuteNonQueryAsync();
 
@@ -31,14 +30,17 @@ public class Table(NpgsqlDataSource db)
                 stamina         int,
                 skills          int,
                 money           int,
+                points          int,
                 day             int,
                 location_id     int         references locations(id));";
 
         string highscore = @"
-                create table if not exists highscore (
-                id              serial      primary key,
-                player_name     text        references players(name),
-                points          int);";
+                CREATE TABLE IF NOT EXISTS highscore (
+                id              SERIAL      PRIMARY KEY,
+                player_name     TEXT,
+                points          INT);";
+
+
 
 
         await db.CreateCommand(locations).ExecuteNonQueryAsync();
@@ -53,44 +55,49 @@ public class Table(NpgsqlDataSource db)
 
         await db.CreateCommand(locationsInsertions).ExecuteNonQueryAsync();
 
-        /*
-        string view = @"CREATE OR REPLACE FUNCTION insert_into_highscore()
+
+        string triggerSQL = @"
+                CREATE OR REPLACE FUNCTION calculate_points()
+                RETURNS TRIGGER AS $$
+                BEGIN
+                    NEW.points := NEW.skills * 3 + NEW.money * 2;
+                    RETURN NEW;
+                END;
+                $$ LANGUAGE plpgsql;
+
+                CREATE OR REPLACE TRIGGER update_points_trigger
+                BEFORE INSERT OR UPDATE ON players
+                FOR EACH ROW
+                EXECUTE FUNCTION calculate_points();
+            ";
+
+        await db.CreateCommand(triggerSQL).ExecuteNonQueryAsync();
+
+        string sql = @"
+                        CREATE OR REPLACE FUNCTION update_highscore()
             RETURNS TRIGGER AS $$
             BEGIN
-                -- Calculate points based on skills and money
-                DECLARE
-                    total_points INTEGER;
-                    existing_points INTEGER;
-                BEGIN
-                    -- Calculate total points
-                    total_points := (NEW.skills + NEW.money) * 3;
-        
-                    -- Check if player already exists in highscore table
-                    SELECT points INTO existing_points FROM highscore WHERE player_name = NEW.name;
-        
-                    -- If player exists and new score is higher, update highscore
-                    IF existing_points IS NOT NULL AND total_points > existing_points THEN
-                        UPDATE highscore SET points = total_points WHERE player_name = NEW.name;
-                    -- If player doesn't exist or new score is higher, insert into highscore
-                    ELSE
-                        -- Remove existing highscore
-                        DELETE FROM highscore WHERE player_name = NEW.name;
-                        -- Insert new highscore
-                        INSERT INTO highscore (player_name, points)
-                        VALUES (NEW.name, total_points);
-                    END IF;
-        
-                    RETURN NULL;
-                END;
+                -- Check if the player already exists in the highscore table
+                IF NOT EXISTS (
+                    SELECT 1 FROM highscore WHERE player_name = NEW.name
+                ) THEN
+                    -- Insert the new player into the highscore table
+                    INSERT INTO highscore (player_name, points) VALUES (NEW.name, NEW.points);
+                ELSE
+                    -- If the player already exists, update the score if the new score is higher
+                    UPDATE highscore
+                    SET points = NEW.points
+                    WHERE player_name = NEW.name AND points < NEW.points;
+                END IF;
+                RETURN NULL;
             END;
             $$ LANGUAGE plpgsql;
 
-            CREATE TRIGGER players_insert_trigger
-            AFTER INSERT ON players
-            FOR EACH ROW
-            EXECUTE FUNCTION insert_into_highscore();";
+        CREATE OR REPLACE TRIGGER highscore_trigger
+        AFTER INSERT OR UPDATE ON players
+        FOR EACH ROW EXECUTE FUNCTION update_highscore();";
 
-        await db.CreateCommand(view).ExecuteNonQueryAsync();
-        */
+        await db.CreateCommand(sql).ExecuteNonQueryAsync();
+
     }
 }
