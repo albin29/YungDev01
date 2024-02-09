@@ -29,9 +29,6 @@ finally
 {
     listener.Stop();
 }
-
-
-
 void Router(HttpListenerContext context)
 {
 
@@ -74,12 +71,6 @@ void Router(HttpListenerContext context)
     }
 }
 
-
-
-
-
-
-
 void HandleRequest(IAsyncResult result)
 {
     if (result.AsyncState is HttpListener listener)
@@ -91,14 +82,6 @@ void HandleRequest(IAsyncResult result)
         listener.BeginGetContext(new AsyncCallback(HandleRequest), listener);
     }
 }
-
-/*
-void NotFound(HttpListenerResponse res)
-{
-    res.StatusCode = (int)HttpStatusCode.NotFound;
-    res.Close();
-}
-*/
 void ControlC()
 {
     Console.CancelKeyPress += delegate (object? sender, ConsoleCancelEventArgs e)

@@ -26,10 +26,26 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
             {
                 Sleep(body);
                 Console.WriteLine($"Registered the following {body}");
+
+                RandomEventGenerator randomEvent = new(db, body);
+                Random random = new();
+                int result = random.Next(1, 3);
+
+                if (result == 1)
+                {
+                    ClientResponse(res, randomEvent.Event());
+                }
+
+                else
+                {
+                    ClientResponse(res, "No event was triggered..\n");
+                }
+
             }
             if (path.Contains("moveto"))
             {
                 Console.WriteLine($"Registered the following {body}");
+                MoveTo(body);
             }
 
             if (path.Contains("Hack"))
@@ -37,7 +53,48 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
                 Hack(body, res);
             }
         }
+    }
+    public void MoveTo(string body)
+    {
+        string qGetCurrentStamina = @"
+    SELECT locations.stamina_cost, players.stamina
+    FROM locations
+    JOIN players ON locations.id = @test
+    WHERE players.id = @player_id;
+    ";
+        string[] fields = body.Split(",");
+        int id = Convert.ToInt32(fields[0]), location = Convert.ToInt32(fields[1]);
 
+        using var command = db.CreateCommand(qGetCurrentStamina);
+        command.Parameters.AddWithValue("player_id", id);
+        command.Parameters.AddWithValue("test",location);
+        var reader = command.ExecuteReader();
+        int currentStamina = 0;
+        int staminaCost = 0;
+        while (reader.Read())
+        {
+            staminaCost = reader.GetInt32(0);
+            currentStamina = reader.GetInt32(1);
+        }
+        if (currentStamina >= staminaCost) 
+        {
+            int newStamina = currentStamina - staminaCost;
+            string updatePlayerLocation = @"
+        UPDATE players
+        SET location_id = @location,
+            stamina = @newStamina
+        WHERE id = @player_id;";
+
+            using var cmd = db.CreateCommand(updatePlayerLocation);
+            cmd.Parameters.AddWithValue("player_id", id);
+            cmd.Parameters.AddWithValue("location", location);
+            cmd.Parameters.AddWithValue("newStamina", newStamina);
+            cmd.ExecuteNonQuery();
+        }
+        else
+        {
+            Console.WriteLine("Not enough stamina");
+        }
     }
 
     public void Sleep(string body)
@@ -66,6 +123,7 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
         command.Parameters.AddWithValue("day", day + 1);
         command.Parameters.AddWithValue("stamina", stamina);
         command.ExecuteNonQuery();
+
     }
     public void PlayerRegister(string body)
     {
@@ -174,21 +232,17 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
         }
     }
 
-    private void ErrorResponse(HttpListenerResponse res, string errorMessage)
+        private void ErrorResponse(HttpListenerResponse res, string errorMessage)
     {
         res.StatusCode = 400; // Bad Request
         byte[] buffer = Encoding.UTF8.GetBytes(errorMessage);
         res.OutputStream.Write(buffer, 0, buffer.Length);
-        
     }
 
     private void ClientResponse(HttpListenerResponse res, string successMessage)
     {
         res.StatusCode = 200; // OK
         byte[] buffer = Encoding.UTF8.GetBytes(successMessage);
-        res.OutputStream.Write(buffer, 0, buffer.Length);
-        
+        res.OutputStream.Write(buffer, 0, buffer.Length);      
     }
-
-     
 }
