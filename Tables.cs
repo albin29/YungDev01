@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using Npgsql;
@@ -12,17 +13,25 @@ public class Table(NpgsqlDataSource db)
 {
     public async Task CreateTable()
     {
-        await db.CreateCommand("DROP TABLE IF EXISTS locations cascade").ExecuteNonQueryAsync();
-        await db.CreateCommand("DROP TABLE IF EXISTS highscore CASCADE").ExecuteNonQueryAsync();
+        await db.CreateCommand("DROP TABLE IF EXISTS study_spot cascade").ExecuteNonQueryAsync();
+        await db.CreateCommand("DROP TABLE IF EXISTS shop CASCADE").ExecuteNonQueryAsync();
 
-        string locations = @"
-                create table if not exists locations(
+        string qShop = @"
+                create table if not exists shop(
+                id              serial      primary key,
+                name            text,
+                skills_given    int,
+                stamina_given   int,
+                price           int);";
+
+        string qStudySpot = @"
+                create table if not exists study_spot(
                 id              serial      primary key,
                 name            text,
                 stamina_cost    int,
                 skill_award     int);";
 
-        string players = @"
+        string qPlayers = @"
                 create table if not exists players(
                 id              serial      primary key,
                 name            text        unique,
@@ -31,29 +40,38 @@ public class Table(NpgsqlDataSource db)
                 skills          int,
                 money           int,
                 points          int,
-                day             int,
-                location_id     int         references locations(id));";
+                day             int);";
 
-        string highscore = @"
+        string qHighscore = @"
                 CREATE TABLE IF NOT EXISTS highscore (
-                id              SERIAL      PRIMARY KEY,
-                player_name     TEXT,
-                points          INT);";
+                id              serial      primary key,
+                player_name     text,
+                points          int);";
 
+        await db.CreateCommand(qStudySpot).ExecuteNonQueryAsync();
+        await db.CreateCommand(qPlayers).ExecuteNonQueryAsync();
+        await db.CreateCommand(qHighscore).ExecuteNonQueryAsync();
+        await db.CreateCommand(qShop).ExecuteNonQueryAsync();
 
-
-
-        await db.CreateCommand(locations).ExecuteNonQueryAsync();
-        await db.CreateCommand(players).ExecuteNonQueryAsync();
-        await db.CreateCommand(highscore).ExecuteNonQueryAsync();
-
-        string locationsInsertions = @"
-                insert into locations (name, stamina_cost, skill_award) values
-                ('Home', 0, 0),
+        string qStudySpotInsertions = @"
+                insert into study_spot (name, stamina_cost, skill_award) values
                 ('Neoschool', 2, 2),
                 ('Underground Study', 3, 3);";
 
-        await db.CreateCommand(locationsInsertions).ExecuteNonQueryAsync();
+        string qShopInsertions= @"
+                insert into shop(name, stamina_given, skills_given, price) values
+                ('AMD Ryzen Threadripper PRO 5995WX', 0, 20, 1000),
+                ('SAMSUNG Odyssey ARK 55¨', 0, 9, 500),
+                ('Razer Death Adder', 0, 2, 65),
+                ('Redbull ULTRA', 3, 0, 150),
+                ('Elias Snus', 1, 0, 60),
+                ('Manuels NVIM Addons', 0, 4, 150),
+                ('Project McFly', 0, 5, 125),
+                ('NVIDIA RTX 4090', 0, 60, 2500);";
+
+
+        await db.CreateCommand(qShopInsertions).ExecuteNonQueryAsync();
+        await db.CreateCommand(qStudySpotInsertions).ExecuteNonQueryAsync();
 
 
         string triggerSQL = @"

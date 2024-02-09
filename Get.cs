@@ -56,44 +56,69 @@ curl -X POST localhost:3000/moveto -d YourPlayerID,LocationID
 5. **placeholder::::**
 ----------------------------------------------
 ";
-
     }
-
     public string GetCommand()
     {
-        string result = string.Empty;
-
-        if (path != null && path.Contains("/players"))
+        if (path != null)
         {
-            return ShowPlayer(result);
+            if (path.Contains("/players"))
+            {
+                return ShowPlayer();
+            }
+            if (path.Contains("/shop"))
+            {
+                return Shop();
+            }
+            if (path.Contains("/menu"))
+            {
+                return GetMenu();
+            }
         }
+    return "Not Found";
+    }
+    public string Shop()
+    {
+        string qShop = @"
+            SELECT id, name, skills_given, stamina_given, price
+            FROM shop
+            ";
+        using var command = db.CreateCommand(qShop);
+        var reader = command.ExecuteReader();
 
-        else if (path != null && path.Contains("/menu"))
+        while (reader.Read())
         {
-            return GetMenu();
+            result += "[";
+            result += reader.GetInt32(0);
+            result += ". ";
+            result += reader.GetString(1);
+            result += "] Skills Given: ";
+            result += reader.GetInt32(2);
+            result += " | Stamina Given: ";
+            result += reader.GetInt32(3);
+            result += " | Price: ";
+            result += reader.GetInt32(4);
+            result += "\n";
         }
         return result;
-
     }
-
-    public string ShowPlayer(string result)
+    public string ShowPlayer()
     {
         NpgsqlCommand? command;
-        if (path != string.Empty && lastPath!= string.Empty && path.Contains("players/"))
+
+        if (path != null && lastPath != string.Empty && path.Contains("players/"))
         {
             string qPlayer = @"
-                SELECT id, name, password, stamina, skills, money, day, location_id
+                SELECT id, name, password, stamina, skills, money, day
                 FROM players
                 WHERE id = @player_id;
                 ";
             command = db.CreateCommand(qPlayer);
             command.Parameters.AddWithValue("player_id", Convert.ToInt32(lastPath));
-
         }
         else
         {
             string qAllPlayers = @"
-                SELECT id, name, password, stamina, skills, money, day, location_id
+                SELECT id, name, password, stamina, skills, money, day
                 FROM players
                 ORDER BY id ASC;
                 ";
@@ -115,8 +140,6 @@ curl -X POST localhost:3000/moveto -d YourPlayerID,LocationID
             result += reader.GetInt32(5);
             result += " | Day: ";
             result += reader.GetInt32(6);
-            result += " | Location ID: ";
-            result += reader.GetInt32(7);
             result += "\n";
         }
         return result;
