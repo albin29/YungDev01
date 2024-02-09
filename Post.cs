@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Npgsql;
@@ -45,6 +46,11 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
             {
                 Console.WriteLine($"Registered the following {body}");
                 MoveTo(body);
+            }
+
+            if (path.Contains("Hack"))
+            {
+                Hack(body, res);
             }
         }
     }
@@ -139,6 +145,92 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
         cmd.ExecuteNonQuery();
     }
 
+    private void Hack(string body, HttpListenerResponse res)
+    {
+        var parts = body.Split(',');
+
+        if (parts.Length < 2 || !int.TryParse(parts[0].Trim(), out int hackerId) ||
+            !int.TryParse(parts[1].Trim(), out int targetId))
+        {
+            ErrorResponse(res, "Enter only integers starting from 1");
+            return;
+        }
+
+        if (!PlayerCheck(hackerId) || !PlayerCheck(targetId))
+        {
+            ErrorResponse(res, "enter a number from 1 and up , try a lower number if the target number dont exist");
+            return;
+        }
+
+        int playerStamina = StaminaCheck(hackerId);
+        if (playerStamina < 1)
+        {
+            ErrorResponse(res,"Not enough stamina to execute hack! sleep to recover stamina" );
+            return;
+        }
+        HackResult(hackerId, res);
+
+        
+        ClientResponse(res, $"player {hackerId} succesfully hacked player {targetId}");
+
+
+    }
+
+    private bool PlayerCheck(int playerid)
+    {
+
+        string qPlayercheck = @"SELECT COUNT(*) FROM players WHERE id = @playerId";
+
+        using var cmd = db.CreateCommand(qPlayercheck);
+        cmd.Parameters.AddWithValue("@playerId", playerid);
+        var result = cmd.ExecuteScalar();
+        return Convert.ToInt32(result) > 0;
+
+    }
+
+    private void HackResult(int playerid, HttpListenerResponse res)
+    {
+        Random rnd = new Random();
+        int randomskill = rnd.Next(3, 11);
+        int randommoney = rnd.Next(0, 101);
+        int staminacost = 1;
+
+        string qHackresult = @"
+        UPDATE players SET
+        skills = skills + @randomskill,
+        money = money + @randommoney,
+        stamina = stamina - @staminacost
+        WHERE id = @playerid AND stamina >= @staminacost
+        ";
+
+        using (var cmd = db.CreateCommand(qHackresult))
+        {
+            cmd.Parameters.AddWithValue("randomskill", randomskill);
+            cmd.Parameters.AddWithValue("randommoney", randommoney);
+            cmd.Parameters.AddWithValue("staminacost", staminacost);
+            cmd.Parameters.AddWithValue("playerid", playerid);
+
+            int rowchanged = cmd.ExecuteNonQuery();
+
+            if (rowchanged == 0)
+            {
+                ErrorResponse(res, "Hack did not execute, No update was made.");
+            }
+
+        }
+    }
+
+    private int StaminaCheck(int hackerId)
+    {
+        string qStaminacheck = @"SELECT stamina FROM players WHERE id = @playerId";
+        using (var cmd = db.CreateCommand())
+        {
+            cmd.CommandText = qStaminacheck;
+            cmd.Parameters.AddWithValue("@playerId", hackerId);
+            object result = cmd.ExecuteScalar();
+            return result != DBNull.Value ? Convert.ToInt32(result) : 0;
+        }
+    }
 
         private void ErrorResponse(HttpListenerResponse res, string errorMessage)
     {
@@ -151,6 +243,6 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
     {
         res.StatusCode = 200; // OK
         byte[] buffer = Encoding.UTF8.GetBytes(successMessage);
-        res.OutputStream.Write(buffer, 0, buffer.Length);
+        res.OutputStream.Write(buffer, 0, buffer.Length);      
     }
 }
