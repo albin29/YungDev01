@@ -114,7 +114,7 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
     public void Study(string body)
     {
         string qGetCurrentStamina = @"
-        SELECT study_spot.stamina_cost, study_spot.skill_award, players.stamina , players.skills
+        SELECT study_spot.name, study_spot.stamina_cost, study_spot.skill_award, players.stamina , players.skills
         FROM study_spot
         CROSS JOIN players
         WHERE study_spot.id = @study_spot_id AND players.id = @player_id;";
@@ -126,13 +126,15 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
         command.Parameters.AddWithValue("player_id", id);
         command.Parameters.AddWithValue("study_spot_id", studySpot);
         var reader = command.ExecuteReader();
+        string spotName = string.Empty;
         int currentStamina = 0, skillAward = 0, staminaCost = 0, currentSkill = 0;
         while (reader.Read())
         {
-            staminaCost = reader.GetInt32(0);
-            skillAward = reader.GetInt32(1);
-            currentStamina = reader.GetInt32(2);
-            currentSkill = reader.GetInt32(3);
+            spotName = reader.GetString(0);
+            staminaCost = reader.GetInt32(1);
+            skillAward = reader.GetInt32(2);
+            currentStamina = reader.GetInt32(3);
+            currentSkill = reader.GetInt32(4);
         }
         if (currentStamina >= staminaCost)
         {
@@ -148,10 +150,12 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
             cmd.Parameters.AddWithValue("newStamina", newStamina);
             cmd.Parameters.AddWithValue("newSkill", newSkill);
             cmd.ExecuteNonQuery();
+            ClientResponse(res, $"You studied at the : {spotName} and your new stamina is :{newStamina} and your new amount of skills : {newSkill}$..");
+
         }
         else
         {
-            Console.WriteLine("Not enough stamina");
+            ErrorResponse(res, "not enough stamina");
         }
     }
     public void Sleep(string body)
@@ -200,6 +204,8 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
         cmd.Parameters.AddWithValue("day", day);
         cmd.Parameters.AddWithValue("location_id", location_id);
         cmd.ExecuteNonQuery();
+        ClientResponse(res, $" player created : {name} \n your current stats are \n Stamina: {stamina} \n Skills: {skills} \n Money: {money} \n On Day: {day}");
+
     }
     private void Hack(string body, HttpListenerResponse res)
     {
