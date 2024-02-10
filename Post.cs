@@ -237,10 +237,10 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
     private bool PlayerCheck(int hackerId)
 
     {
-        string qPlayercheck = @"SELECT COUNT(*) FROM players WHERE id = @playerId";
+        string qPlayercheck = @"SELECT COUNT(*) FROM players WHERE id = @hackerId";
 
         using var cmd = db.CreateCommand(qPlayercheck);
-        cmd.Parameters.AddWithValue("@playerId", hackerId);
+        cmd.Parameters.AddWithValue("@hackerId", hackerId);
         var result = cmd.ExecuteScalar();
         return Convert.ToInt32(result) > 0;
     }
@@ -254,7 +254,7 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
 
         string qTargetresult = @"UPDATE players SET
         skills = GREATEST(skills - @randomskill ,0),
-        money = GREATEST(skills - @randommoney , 0)
+        money = GREATEST(money - @randommoney , 0)
         WHERE id = @targetId";
 
         string qHackresult = @"
@@ -300,11 +300,11 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
     }
     private int StaminaCheck(int hackerId)
     {
-        string qStaminacheck = @"SELECT stamina FROM players WHERE id = @playerId";
+        string qStaminacheck = @"SELECT stamina FROM players WHERE id = @hackerId";
         using (var cmd = db.CreateCommand())
         {
             cmd.CommandText = qStaminacheck;
-            cmd.Parameters.AddWithValue("@playerId", hackerId);
+            cmd.Parameters.AddWithValue("@hackerId", hackerId);
             object result = cmd.ExecuteScalar();
             return result != DBNull.Value ? Convert.ToInt32(result) : 0;
         }
