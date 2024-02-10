@@ -9,7 +9,6 @@ namespace YungDev01;
 
 public class RandomEventGenerator(NpgsqlDataSource db, string body)
 {
-
     public string Event()
     {
 
