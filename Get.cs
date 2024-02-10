@@ -84,7 +84,7 @@ curl -X POST localhost:3000/moveto -d YourPlayerID,LocationID
 
     public string Scoreboard ()
     {
-        string result = "\u001b[91;1m** SCOREBOARD **\u001b[0m\n";
+        string result = "\u001b[91;1m****** SCOREBOARD ******\u001b[0m\n";
 
         string qCharacter = @"
     SELECT player_name, points 
@@ -97,7 +97,7 @@ curl -X POST localhost:3000/moveto -d YourPlayerID,LocationID
 
         while (reader.Read())
         {
-            result += reader.GetString(0).PadRight(10);
+            result += reader.GetString(0).PadRight(9);
             result += " | Score: ";
             result += reader.GetInt32(1).ToString().PadLeft(5);
             result += "\n";
