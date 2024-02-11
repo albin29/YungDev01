@@ -173,18 +173,24 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
 
         while (reader.Read()) { day = reader.GetInt32(0); }
 
-        string qUpdatePlayer = @"
+        if (day < 10)
+        {
+            string qUpdatePlayer = @"
         UPDATE players
         SET day = @day, stamina = @stamina
         WHERE id = @player_id;
         ";
 
-        using var command = db.CreateCommand(qUpdatePlayer);
-        command.Parameters.AddWithValue("player_id", Convert.ToInt32(body));
-        command.Parameters.AddWithValue("day", day + 1);
-        command.Parameters.AddWithValue("stamina", stamina);
-        command.ExecuteNonQuery();
-
+            using var command = db.CreateCommand(qUpdatePlayer);
+            command.Parameters.AddWithValue("player_id", Convert.ToInt32(body));
+            command.Parameters.AddWithValue("day", day + 1);
+            command.Parameters.AddWithValue("stamina", stamina);
+            command.ExecuteNonQuery();
+        }
+        else
+        {
+            Console.WriteLine("Day 10 already reached, if you want to try playing again, create a new character.");
+        }
     }
     public void PlayerRegister(string body)
     {
@@ -239,7 +245,7 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
         string qPlayercheck = @"SELECT COUNT(*) FROM players WHERE id = @hackerId";
 
         using var cmd = db.CreateCommand(qPlayercheck);
-        cmd.Parameters.AddWithValue("@hackerId", hackerId);
+        cmd.Parameters.AddWithValue("@hackerId", hackerID);
 
         var result = cmd.ExecuteScalar();
         return Convert.ToInt32(result) > 0;
