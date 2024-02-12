@@ -7,77 +7,60 @@ using Npgsql;
 
 namespace YungDev01;
 
-public class RandomEventGenerator(NpgsqlDataSource db, string body)
+public class RandomEventGenerator(NpgsqlDataSource db, string playerId)
 {
     public string Event()
     {
+        int id = Convert.ToInt32(playerId);
 
+        Update update = new(db);
+        Check check = new(db);
         Random random = new();
-        int roll = random.Next(1, 6);
+
+        int roll = random.Next(1, 11);
+
+        string eventResponse = string.Empty;
+
         if (roll == 1)
         {
-            string qFeelingSick = @"
-            update players
-            set stamina = 0
-            where id = @player_id;";
+            update.Stamina(0, id);
 
-            using var command = db.CreateCommand(qFeelingSick);
-            command.Parameters.AddWithValue("player_id", Convert.ToInt32(body));
-            command.ExecuteNonQuery();
-
-            return "***EVENT TRIGGERED***\n\nYou are feeling sick today and are gonna have to stay in..\n* -5 Stamina";
+            eventResponse = "You are feeling sick today and are gonna have to stay in..\n* -5 Stamina";
         }
-
         if (roll == 2 || roll == 3)
         {
-            string qBadSleep= @"
-            update players
-            set stamina = 4
-            where id = @player_id;";
+            update.Stamina(4, id);
 
-            using var command = db.CreateCommand(qBadSleep);
-            command.Parameters.AddWithValue("player_id", Convert.ToInt32(body));
-            command.ExecuteNonQuery();
-
-            return "***EVENT TRIGGERED***\n\nYou didnt sleep great tonight..\n* -1 Stamina";
+            eventResponse = "You didnt have a great night of sleep..\n* -1 Stamina";
         }
         if (roll == 4 || roll == 5)
         {
-            string qGoodSleep = @"
-            update players
-            set stamina = 7
-            where id = @player_id;";
+            update.Stamina(7, id);
 
-            using var command = db.CreateCommand(qGoodSleep);
-            command.Parameters.AddWithValue("player_id", Convert.ToInt32(body));
-            command.ExecuteNonQuery();
-
-            return "***EVENT TRIGGERED***\n\nYou had an awesome night of sleep!\n* +5 Stamina";
+            eventResponse = "You had an awesome night of sleep!\n* +2 Stamina";
         }
-        if (roll == 19)
+        if (roll == 6)
         {
-            string qGoodSleep = @"
-            update players
-            set stamina = 7
-            where id = @player_id;";
+            update.Stamina(0, id);
+            update.Money(check.Money(id) + 3000, id);
 
-            using var command = db.CreateCommand(qGoodSleep);
-            command.Parameters.AddWithValue("player_id", Convert.ToInt32(body));
-            command.ExecuteNonQuery();
-
-            return "***EVENT TRIGGERED***\nYou are feeling sick today and are gonna have to stay in..\n* -5 Stamina";
+            eventResponse = "On your way to bed, you decided to visit the local bar and got way too drunk, " +
+                    "but you went to the casino and won big!\n* -5 Stamina\n* +3000$";
         }
-        if (roll == 19)
+        if (roll == 7 || roll == 8)
         {
-            string qGoodSleep = @"
-            update players
-            set stamina = 7
-            where id = @player_id;";
+            update.Money(check.Money(id) + 300, id);
 
-            using var command = db.CreateCommand(qGoodSleep);
-            command.Parameters.AddWithValue("player_id", Convert.ToInt32(body));
-            command.ExecuteNonQuery();
+            eventResponse = "After waking you find that you lost a tooth, you look under your pillow and find some money\n* +300$";
         }
-        return "";
+        if (roll == 9 || roll == 10)
+        {
+            update.Money(check.Money(id) - 300, id);
+
+            eventResponse = "Upon waking you look in your wallet and find a note saying your " +
+                            "girlfriend took some money for shopping\n* -300$";
+        }
+
+        return "***EVENT TRIGGERED***\n\n" + eventResponse;
     }
 }
