@@ -304,7 +304,7 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
         {
             cmd.CommandText = qStaminacheck;
             cmd.Parameters.AddWithValue("@hackerId", hackerId);
-            object result = cmd.ExecuteScalar();
+            object? result = cmd.ExecuteScalar();
             return result != DBNull.Value ? Convert.ToInt32(result) : 0;
         }
     }
