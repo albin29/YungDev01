@@ -54,6 +54,11 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
                 Console.WriteLine($"Registered the following {body}");
                 Shop(body);
             }
+
+            if (path.Contains("work"))
+            {
+                GoToWork(res,body);
+            }
         }
     }
     public void Shop(string body)
@@ -308,6 +313,55 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
             return result != DBNull.Value ? Convert.ToInt32(result) : 0;
         }
     }
+
+    public void GoToWork(HttpListenerResponse res, string body)
+    {
+        if (int.TryParse(body, out int workerId))
+        {
+            string qWorkerId = @"SELECT id, stamina FROM players WHERE id = @workerId";
+            using (var cmd = db.CreateCommand())
+            {
+                cmd.CommandText = qWorkerId;
+                cmd.Parameters.AddWithValue("@workerId", workerId);
+
+                using (var reader = cmd.ExecuteReader())
+                {
+                    if (!reader.Read())
+                    {
+                        ErrorResponse(res, "Invalid ID, Try another One");
+                        return;
+                    }
+
+                    int workerStamina = reader.IsDBNull(reader.GetOrdinal("stamina")) ? 0 : reader.GetInt32(reader.GetOrdinal("stamina"));
+                    if (workerStamina < 3)
+                    {
+                        ErrorResponse(res, "Not enough stamina!");
+                        return;
+                    }
+                }
+            }
+
+            Random rnd = new Random();
+            int moneyEarned = rnd.Next(0, 300);
+            int staminaloss = 3;
+            string qWork = @"UPDATE players SET money = money + @moneyEarned, stamina = stamina - @staminaloss WHERE id = @workerId AND stamina >= @staminaloss";
+            using (var updateCmd = db.CreateCommand())
+            {
+                updateCmd.CommandText = qWork;
+                updateCmd.Parameters.AddWithValue("@moneyEarned", moneyEarned);
+                updateCmd.Parameters.AddWithValue("@staminaloss",staminaloss);
+                updateCmd.Parameters.AddWithValue("@workerId", workerId);
+
+                updateCmd.ExecuteNonQuery();
+
+            }
+            ClientResponse(res, $"Good job!! you earned {moneyEarned}$ and it cost you {staminaloss} stamina! ");
+        }
+    }
+
+
+
+
     private void ErrorResponse(HttpListenerResponse res, string errorMessage)
     {
         res.StatusCode = 400; // Bad Request
