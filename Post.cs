@@ -230,11 +230,11 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
             ErrorResponse(res, "*  Not enough stamina to execute hack! sleep to recover stamina" );
             return;
         }
-        HackResult(hackerId, res);
+        HackResult(hackerId,targetId, res);
 
         ClientResponse(res, $"player {hackerId} succesfully hacked player {targetId}");
     }
-    private bool PlayerCheck(int playerid)
+    private bool PlayerCheck(int hackerId)
     {
         string qPlayercheck = @"SELECT COUNT(*) FROM players WHERE id = @hackerId";
 
@@ -244,7 +244,7 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
         var result = cmd.ExecuteScalar();
         return Convert.ToInt32(result) > 0;
     }
-    private void HackResult(int playerid, HttpListenerResponse res)
+    private void HackResult(int hackerId, int targetId,  HttpListenerResponse res)
     {
         Random rnd = new Random();
         int randomskill = rnd.Next(3, 11);
@@ -284,7 +284,7 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
             cmd.Parameters.AddWithValue("randomskill", randomskill);
             cmd.Parameters.AddWithValue("randommoney", randommoney);
             cmd.Parameters.AddWithValue("staminacost", staminacost);
-            cmd.Parameters.AddWithValue("playerid", playerid);
+            cmd.Parameters.AddWithValue("hackerid", hackerId);
 
             int rowchanged = cmd.ExecuteNonQuery();
 
