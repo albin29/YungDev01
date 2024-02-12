@@ -269,7 +269,7 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
             cmd.Parameters.AddWithValue("@randomskill", randomskill);
             cmd.Parameters.AddWithValue("@randommoney", randommoney);
             cmd.Parameters.AddWithValue("@targetId", targetId);
-
+            cmd.Parameters.AddWithValue("@playerid", hackerId);
             int rowchang = cmd.ExecuteNonQuery();
 
             if (rowchang == 0)
@@ -284,7 +284,7 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
             cmd.Parameters.AddWithValue("randomskill", randomskill);
             cmd.Parameters.AddWithValue("randommoney", randommoney);
             cmd.Parameters.AddWithValue("staminacost", staminacost);
-            cmd.Parameters.AddWithValue("hackerid", hackerId);
+            cmd.Parameters.AddWithValue("playerid", hackerId);
 
             int rowchanged = cmd.ExecuteNonQuery();
 
