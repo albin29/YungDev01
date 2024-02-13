@@ -188,7 +188,7 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
     }
     public void PlayerRegister(string body)
     {
-        int stamina = 5, skills = 0, money = 100, day = 1, location_id = 1;
+        int stamina = 5, skills = 0, money = 100, day = 1;
         string[] fields = body.Split(',');
         string name = fields[0], password = fields[1];
         string qRegisterPlayer = @"
