@@ -136,6 +136,7 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
             currentStamina = reader.GetInt32(3);
             currentSkill = reader.GetInt32(4);
         }
+
         if (currentStamina >= staminaCost)
         {
             int newStamina = currentStamina - staminaCost;
@@ -150,12 +151,11 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
             cmd.Parameters.AddWithValue(newSkill);
             cmd.Parameters.AddWithValue(id);
             cmd.ExecuteNonQuery();
-            ClientResponse(res, $"You studied at the : {spotName} and your new stamina is :{newStamina} and your new amount of skills : {newSkill}$..");
-
+            ClientResponse(res, $"You studied at {spotName}\n* Current Stamina = {newStamina}\n* Current skills = {newSkill}");
         }
         else
         {
-            ErrorResponse(res, "not enough stamina");
+            ErrorResponse(res, "Insufficient stamina..");
         }
     }
     public void Sleep(string body)
@@ -191,6 +191,7 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
         int stamina = 5, skills = 0, money = 100, day = 1;
         string[] fields = body.Split(',');
         string name = fields[0], password = fields[1];
+
         string qRegisterPlayer = @"
         insert into players (name,password,stamina,skills,money,day) Values
         ($1, $2, $3, $4, $5, $6);";
@@ -203,7 +204,8 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
         cmd.Parameters.AddWithValue(money);
         cmd.Parameters.AddWithValue(day);
         cmd.ExecuteNonQuery();
-        ClientResponse(res, $" player created : {name} \n your current stats are \n Stamina: {stamina} \n Skills: {skills} \n Money: {money} \n On Day: {day}");
+
+        ClientResponse(res, $"Player Created: {name}\nCurrent Stats\n* Stamina: {stamina}\n* Skills: {skills}\n* Money: {money}\n* Day: {day}");
 
     }
     private void Hack(string body, HttpListenerResponse res)
