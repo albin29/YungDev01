@@ -15,10 +15,10 @@ public class Check(NpgsqlDataSource db)
         string qCheckMoney = @"
         select money
         from players
-        where id = @player_id;";
+        where id = $1;";
 
         using var cmd = db.CreateCommand(qCheckMoney);
-        cmd.Parameters.AddWithValue("player_id", playerId);
+        cmd.Parameters.AddWithValue(playerId);
         var reader = cmd.ExecuteReader();
 
         while (reader.Read()) { currentMoney = reader.GetInt32(0); }
@@ -31,10 +31,10 @@ public class Check(NpgsqlDataSource db)
         string qCheckMoney = @"
         select skills 
         from players
-        where id = @player_id;";
+        where id = $1;";
 
         using var cmd = db.CreateCommand(qCheckMoney);
-        cmd.Parameters.AddWithValue("player_id", playerId);
+        cmd.Parameters.AddWithValue(playerId);
         var reader = cmd.ExecuteReader();
 
         while (reader.Read()) { currentSkills = reader.GetInt32(0); }

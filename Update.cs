@@ -13,36 +13,36 @@ public class Update(NpgsqlDataSource db)
     {
         string qGoodSleep = @"
         update players
-        set money = @updated_money
-        where id = @player_id;";
+        set money = $1 
+        where id = $2;";
 
         using var command = db.CreateCommand(qGoodSleep);
-        command.Parameters.AddWithValue("updated_money", updatedMoney);
-        command.Parameters.AddWithValue("player_id", playerId);
+        command.Parameters.AddWithValue(updatedMoney);
+        command.Parameters.AddWithValue(playerId);
         command.ExecuteNonQuery();
     }
     public void Stamina(int updatedStamina, int playerId)
     {
         string qGoodSleep = @"
         update players
-        set stamina = @updated_stamina 
-        where id = @player_id;";
+        set stamina = $1 
+        where id = $2;";
 
         using var command = db.CreateCommand(qGoodSleep);
-        command.Parameters.AddWithValue("updated_stamina", updatedStamina);
-        command.Parameters.AddWithValue("player_id", playerId);
+        command.Parameters.AddWithValue(updatedStamina);
+        command.Parameters.AddWithValue(playerId);
         command.ExecuteNonQuery();
     }
     public void Skills(int updatedSkills, int playerId)
     {
         string qGoodSleep = @"
         update players
-        set stamina = @updated_skills 
-        where id = @player_id;";
+        set stamina = $1 
+        where id = $2;";
 
         using var command = db.CreateCommand(qGoodSleep);
-        command.Parameters.AddWithValue("updated_skills", updatedSkills);
-        command.Parameters.AddWithValue("player_id", playerId);
+        command.Parameters.AddWithValue(updatedSkills);
+        command.Parameters.AddWithValue(playerId);
         command.ExecuteNonQuery();
     }
 }
