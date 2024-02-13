@@ -62,14 +62,14 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
         SELECT players.money, shop.price, players.stamina, shop.stamina_given, players.skills, shop.skills_given, shop.name, players.name
         FROM players
         CROSS JOIN shop
-        WHERE shop.id = @shop_id AND players.id = @player_id;";
+        WHERE shop.id = $1 AND players.id = $2;";
 
         string[] fields = body.Split(",");
         int playerId = Convert.ToInt32(fields[0]), shopId = Convert.ToInt32(fields[1]);
 
         using var command = db.CreateCommand(qCheckValues);
-        command.Parameters.AddWithValue("player_id", playerId);
-        command.Parameters.AddWithValue("shop_id", shopId);
+        command.Parameters.AddWithValue(playerId);
+        command.Parameters.AddWithValue(shopId);
 
         int currentStamina = 0, givenStamina = 0, currentCash = 0, priceCash = 0, currentSkills = 0, givenSkills = 0;
         string product = string.Empty, playerName = string.Empty;
@@ -94,14 +94,14 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
 
             string qNewValues = @"
             UPDATE players
-            set stamina = @new_stamina, skills = @new_skills, money = @new_cash
-            WHERE id = @player_id;";
+            set stamina = $1, skills = $2, money = $3 
+            WHERE id = $4;";
 
             using var cmd = db.CreateCommand(qNewValues);
-            cmd.Parameters.AddWithValue("new_stamina", newStamina);
-            cmd.Parameters.AddWithValue("new_cash", newCash);
-            cmd.Parameters.AddWithValue("new_skills", newSkills);
-            cmd.Parameters.AddWithValue("player_id", playerId);
+            cmd.Parameters.AddWithValue(newStamina);
+            cmd.Parameters.AddWithValue(newSkills);
+            cmd.Parameters.AddWithValue(newCash);
+            cmd.Parameters.AddWithValue(playerId);
             cmd.ExecuteNonQuery();
 
             ClientResponse(res, $"{playerName} has purchased {product} for the price of {priceCash}$..");
@@ -117,14 +117,14 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
         SELECT study_spot.name, study_spot.stamina_cost, study_spot.skill_award, players.stamina , players.skills
         FROM study_spot
         CROSS JOIN players
-        WHERE study_spot.id = @study_spot_id AND players.id = @player_id;";
+        WHERE study_spot.id = $1 AND players.id = $2;";
 
         string[] fields = body.Split(",");
         int id = Convert.ToInt32(fields[0]), studySpot = Convert.ToInt32(fields[1]);
 
         using var command = db.CreateCommand(qGetCurrentStamina);
-        command.Parameters.AddWithValue("player_id", id);
-        command.Parameters.AddWithValue("study_spot_id", studySpot);
+        command.Parameters.AddWithValue(studySpot);
+        command.Parameters.AddWithValue(id);
         var reader = command.ExecuteReader();
         string spotName = string.Empty;
         int currentStamina = 0, skillAward = 0, staminaCost = 0, currentSkill = 0;
@@ -142,13 +142,13 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
             int newSkill = skillAward + currentSkill;
             string updatePlayerLocation = @"
             UPDATE players
-            set stamina = @newStamina, skills = @newSkill
-            WHERE id = @player_id;";
+            set stamina = $1, skills = $2 
+            WHERE id = $3;";
 
             using var cmd = db.CreateCommand(updatePlayerLocation);
-            cmd.Parameters.AddWithValue("player_id", id);
-            cmd.Parameters.AddWithValue("newStamina", newStamina);
-            cmd.Parameters.AddWithValue("newSkill", newSkill);
+            cmd.Parameters.AddWithValue(newStamina);
+            cmd.Parameters.AddWithValue(newSkill);
+            cmd.Parameters.AddWithValue(id);
             cmd.ExecuteNonQuery();
             ClientResponse(res, $"You studied at the : {spotName} and your new stamina is :{newStamina} and your new amount of skills : {newSkill}$..");
 
@@ -163,11 +163,11 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
         string qGetCurrentDay = @"
         SELECT day
         FROM players
-        WHERE id = @player_id;
+        WHERE id = $1;
         ";
 
         using var command2 = db.CreateCommand(qGetCurrentDay);
-        command2.Parameters.AddWithValue("player_id", Convert.ToInt32(body));
+        command2.Parameters.AddWithValue(Convert.ToInt32(body));
         var reader = command2.ExecuteReader();
         int stamina = 5, day = 0;
 
@@ -175,14 +175,14 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
 
         string qUpdatePlayer = @"
         UPDATE players
-        SET day = @day, stamina = @stamina
-        WHERE id = @player_id;
+        SET day = $1, stamina = $2
+        WHERE id = $3;
         ";
 
         using var command = db.CreateCommand(qUpdatePlayer);
-        command.Parameters.AddWithValue("player_id", Convert.ToInt32(body));
-        command.Parameters.AddWithValue("day", day + 1);
-        command.Parameters.AddWithValue("stamina", stamina);
+        command.Parameters.AddWithValue(day + 1);
+        command.Parameters.AddWithValue(stamina);
+        command.Parameters.AddWithValue(Convert.ToInt32(body));
         command.ExecuteNonQuery();
 
     }
@@ -193,16 +193,15 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
         string name = fields[0], password = fields[1];
         string qRegisterPlayer = @"
         insert into players (name,password,stamina,skills,money,day) Values
-        (@name,@password,@stamina,@skills,@money,@day);";
+        ($1, $2, $3, $4, $5, $6);";
 
         var cmd = db.CreateCommand(qRegisterPlayer);
-        cmd.Parameters.AddWithValue("name", name);
-        cmd.Parameters.AddWithValue("password", password);
-        cmd.Parameters.AddWithValue("stamina", stamina);
-        cmd.Parameters.AddWithValue("skills", skills);
-        cmd.Parameters.AddWithValue("money", money);
-        cmd.Parameters.AddWithValue("day", day);
-        cmd.Parameters.AddWithValue("location_id", location_id);
+        cmd.Parameters.AddWithValue(name);
+        cmd.Parameters.AddWithValue(password);
+        cmd.Parameters.AddWithValue(stamina);
+        cmd.Parameters.AddWithValue(skills);
+        cmd.Parameters.AddWithValue(money);
+        cmd.Parameters.AddWithValue(day);
         cmd.ExecuteNonQuery();
         ClientResponse(res, $" player created : {name} \n your current stats are \n Stamina: {stamina} \n Skills: {skills} \n Money: {money} \n On Day: {day}");
 
@@ -246,45 +245,46 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
     }
     private void HackResult(int hackerId, int targetId,  HttpListenerResponse res)
     {
+        Check check = new(db);
+        Update update = new(db);
         Random rnd = new Random();
         int randomskill = rnd.Next(3, 11);
         int randommoney = rnd.Next(0, 101);
         int staminacost = 1;
 
         string qTargetresult = @"UPDATE players SET
-        skills = GREATEST(skills - @randomskill ,0),
-        money = GREATEST(money - @randommoney , 0)
-        WHERE id = @targetId";
+        skills = GREATEST(skills - $1, 0),
+        money = GREATEST(money - $2, 0)
+        WHERE id = $3";
 
-        string qHackresult = @"
-        UPDATE players SET
-        skills = skills + @randomskill,
-        money = money + @randommoney,
-        stamina = stamina - @staminacost
-        WHERE id = @playerid AND stamina >= @staminacost
-        ";
 
         using (var cmd = db.CreateCommand(qTargetresult))
         {
-            cmd.Parameters.AddWithValue("@randomskill", randomskill);
-            cmd.Parameters.AddWithValue("@randommoney", randommoney);
-            cmd.Parameters.AddWithValue("@targetId", targetId);
-            cmd.Parameters.AddWithValue("@playerid", hackerId);
+            cmd.Parameters.AddWithValue(randomskill);
+            cmd.Parameters.AddWithValue(randommoney);
+            cmd.Parameters.AddWithValue(targetId);
             int rowchang = cmd.ExecuteNonQuery();
 
             if (rowchang == 0)
             {
                 ErrorResponse(res, "*  Hack did not execute, No update was made.");
             }
-
         }
+
+        string qHackresult = @"
+        UPDATE players SET
+        skills = skills + $1,
+        money = money + $2,
+        stamina = stamina - $3 
+        WHERE id = $4 AND stamina >= $3
+        ";
 
         using (var cmd = db.CreateCommand(qHackresult))
         {
-            cmd.Parameters.AddWithValue("randomskill", randomskill);
-            cmd.Parameters.AddWithValue("randommoney", randommoney);
-            cmd.Parameters.AddWithValue("staminacost", staminacost);
-            cmd.Parameters.AddWithValue("playerid", hackerId);
+            cmd.Parameters.AddWithValue(randomskill);
+            cmd.Parameters.AddWithValue(randommoney);
+            cmd.Parameters.AddWithValue(staminacost);
+            cmd.Parameters.AddWithValue(hackerId);
 
             int rowchanged = cmd.ExecuteNonQuery();
 
@@ -299,11 +299,11 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
     }
     private int StaminaCheck(int hackerId)
     {
-        string qStaminacheck = @"SELECT stamina FROM players WHERE id = @hackerId";
+        string qStaminacheck = @"SELECT stamina FROM players WHERE id = $1";
         using (var cmd = db.CreateCommand())
         {
             cmd.CommandText = qStaminacheck;
-            cmd.Parameters.AddWithValue("@hackerId", hackerId);
+            cmd.Parameters.AddWithValue(hackerId);
             object? result = cmd.ExecuteScalar();
             return result != DBNull.Value ? Convert.ToInt32(result) : 0;
         }
