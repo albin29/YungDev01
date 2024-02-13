@@ -112,10 +112,9 @@ public class Get(HttpListenerRequest req, NpgsqlDataSource db)
         string result = "\u001b[91;1m****** SCOREBOARD ******\u001b[0m\n";
 
         string qCharacter = @"
-    SELECT player_name, points 
-    FROM highscore
-    ORDER BY points DESC;";
-
+        SELECT player_name, points 
+        FROM highscore
+        ORDER BY points DESC;";
 
         using var command = db.CreateCommand(qCharacter);
         var reader = command.ExecuteReader();
@@ -129,15 +128,15 @@ public class Get(HttpListenerRequest req, NpgsqlDataSource db)
 
         }
         return result;
-
     }
 
     public string Shop()
     {
         string qShop = @"
-            SELECT id, name, skills_given, stamina_given, price
-            FROM shop
-            ";
+        SELECT id, name, skills_given, stamina_given, price
+        FROM shop
+        ";
+
         using var command = db.CreateCommand(qShop);
         var reader = command.ExecuteReader();
 
@@ -167,10 +166,10 @@ public class Get(HttpListenerRequest req, NpgsqlDataSource db)
             string qPlayer = @"
                 SELECT id, name, password, stamina, skills, money, day
                 FROM players
-                WHERE id = @player_id;
+                WHERE id = $1;
                 ";
             command = db.CreateCommand(qPlayer);
-            command.Parameters.AddWithValue("player_id", Convert.ToInt32(lastPath));
+            command.Parameters.AddWithValue(Convert.ToInt32(lastPath));
         }
         else
         {
