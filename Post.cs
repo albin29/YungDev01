@@ -63,7 +63,7 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
         FROM players
         CROSS JOIN shop
         WHERE shop.id = @shop_id AND players.id = @player_id;";
-
+    
         string[] fields = body.Split(",");
         int playerId = Convert.ToInt32(fields[0]), shopId = Convert.ToInt32(fields[1]);
 
