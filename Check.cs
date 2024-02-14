@@ -28,17 +28,49 @@ public class Check(NpgsqlDataSource db)
     public int Skills(int playerId)
     {
         int currentSkills = 0;
-        string qCheckMoney = @"
+        string qCheckSkills = @"
         select skills 
         from players
         where id = $1;";
 
-        using var cmd = db.CreateCommand(qCheckMoney);
+        using var cmd = db.CreateCommand(qCheckSkills);
         cmd.Parameters.AddWithValue(playerId);
         var reader = cmd.ExecuteReader();
 
         while (reader.Read()) { currentSkills = reader.GetInt32(0); }
 
         return currentSkills;
+    }
+    public int Stamina(int playerId)
+    {
+        int currentStamina = 0;
+        string qCheckStamina = @"
+        select stamina 
+        from players
+        where id = $1;";
+
+        using var cmd = db.CreateCommand(qCheckStamina);
+        cmd.Parameters.AddWithValue(playerId);
+        var reader = cmd.ExecuteReader();
+
+        while (reader.Read()) { currentStamina = reader.GetInt32(0); }
+
+        return currentStamina;
+    }
+    public string Name(int playerId)
+    {
+        string playerName = string.Empty;
+        string qPlayerName = @"
+        select name
+        from players
+        where id = $1;";
+
+        using var cmd = db.CreateCommand(qPlayerName);
+        cmd.Parameters.AddWithValue(playerId);
+        var reader = cmd.ExecuteReader();
+
+        while (reader.Read()) { playerName = reader.GetString(0); }
+
+        return playerName;
     }
 }

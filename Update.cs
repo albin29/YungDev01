@@ -37,7 +37,7 @@ public class Update(NpgsqlDataSource db)
     {
         string qGoodSleep = @"
         update players
-        set stamina = $1 
+        set skills = $1 
         where id = $2;";
 
         using var command = db.CreateCommand(qGoodSleep);
