@@ -151,25 +151,17 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
         WHERE id = $1;
         ";
 
-        using var command2 = db.CreateCommand(qGetCurrentDay);
-        command2.Parameters.AddWithValue(Convert.ToInt32(body));
-        var reader = command2.ExecuteReader();
-        int stamina = 5, day = 0;
+        using var command = db.CreateCommand(qGetCurrentDay);
+        command.Parameters.AddWithValue(Convert.ToInt32(body));
+        var reader = command.ExecuteReader();
+        int day = 0;
 
         while (reader.Read()) { day = reader.GetInt32(0); }
 
-        string qUpdatePlayer = @"
-        UPDATE players
-        SET day = $1, stamina = $2
-        WHERE id = $3;
-        ";
+        int playerId = Convert.ToInt32(body);
 
-        using var command = db.CreateCommand(qUpdatePlayer);
-        command.Parameters.AddWithValue(day + 1);
-        command.Parameters.AddWithValue(stamina);
-        command.Parameters.AddWithValue(Convert.ToInt32(body));
-        command.ExecuteNonQuery();
-
+        update.Stamina(5, playerId);
+        update.Day(day + 1, playerId);
     }
     public void PlayerRegister(string body)
     {
