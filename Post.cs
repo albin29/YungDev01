@@ -321,11 +321,11 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
 
         if (int.TryParse(body, out int workerId))
         {
-            string qWorkerId = @"SELECT id, stamina,skills FROM players WHERE id = @workerId";
+            string qWorkerId = @"SELECT id, stamina,skills FROM players WHERE id = $1";
             using (var cmd = db.CreateCommand())
             {
                 cmd.CommandText = qWorkerId;
-                cmd.Parameters.AddWithValue("@workerId", workerId);
+                cmd.Parameters.AddWithValue(workerId);
 
                 using (var reader = cmd.ExecuteReader())
                 {
@@ -419,14 +419,14 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
             }
 
             
-            string qWork = @"UPDATE players SET money = money + @moneyEarned, stamina = stamina - @staminaloss ,skills = skills +@skillGain WHERE id = @workerId AND stamina >= @staminaloss";
+            string qWork = @"UPDATE players SET money = money + $1, stamina = stamina - $2 ,skills = skills +$3 WHERE id = $4 AND stamina >= $2";
             using (var updateCmd = db.CreateCommand())
             {
                 updateCmd.CommandText = qWork;
-                updateCmd.Parameters.AddWithValue("@moneyEarned", moneyEarned);
-                updateCmd.Parameters.AddWithValue("@staminaloss",staminaloss);
-                updateCmd.Parameters.AddWithValue("@skillGain", skillGain);
-                updateCmd.Parameters.AddWithValue("@workerId", workerId);
+                updateCmd.Parameters.AddWithValue(moneyEarned);
+                updateCmd.Parameters.AddWithValue(staminaloss);
+                updateCmd.Parameters.AddWithValue(skillGain);
+                updateCmd.Parameters.AddWithValue(workerId);
 
 
                 updateCmd.ExecuteNonQuery();
