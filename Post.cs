@@ -11,6 +11,8 @@ namespace YungDev01;
 
 public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResponse res)
 {
+    Check check = new(db);
+    Update update = new(db);
     public void Commands(string body)
     {
         string? path = req.Url?.AbsolutePath;
@@ -58,57 +60,40 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
     }
     public void Shop(string body)
     {
-        string qCheckValues = @"
-        SELECT players.money, shop.price, players.stamina, shop.stamina_given, players.skills, shop.skills_given, shop.name, players.name
-        FROM players
-        CROSS JOIN shop
-        WHERE shop.id = $1 AND players.id = $2;";
-
         string[] fields = body.Split(",");
         int playerId = Convert.ToInt32(fields[0]), shopId = Convert.ToInt32(fields[1]);
 
+        string qCheckValues = @"
+        SELECT price, skills_given, stamina_given, name
+        FROM shop
+        WHERE shop.id = $1;";
+
         using var command = db.CreateCommand(qCheckValues);
-        command.Parameters.AddWithValue(playerId);
         command.Parameters.AddWithValue(shopId);
 
-        int currentStamina = 0, givenStamina = 0, currentCash = 0, priceCash = 0, currentSkills = 0, givenSkills = 0;
-        string product = string.Empty, playerName = string.Empty;
+        int staminaGiven = 0, price = 0, skillsGiven = 0;
+        string productName = string.Empty;
 
         var reader = command.ExecuteReader();
         while (reader.Read())
         {
-            currentCash = reader.GetInt32(0);
-            priceCash = reader.GetInt32(1);
-            currentStamina = reader.GetInt32(2);
-            givenStamina = reader.GetInt32(3);
-            currentSkills = reader.GetInt32(4);
-            givenSkills = reader.GetInt32(5);
-            product = reader.GetString(6);
-            playerName = reader.GetString(7);
+            price = reader.GetInt32(0);
+            skillsGiven = reader.GetInt32(1);
+            staminaGiven = reader.GetInt32(2);
+            productName = reader.GetString(3);
         }
-        if (currentCash >= priceCash)
+
+        if (check.Money(playerId) >= price)
         {
-            int newCash = currentCash - priceCash;
-            int newStamina = currentStamina + givenStamina;
-            int newSkills = currentSkills + givenSkills;
+            update.Money(check.Money(playerId) - price, playerId);
+            update.Stamina(check.Stamina(playerId) + staminaGiven, playerId);
+            update.Skills(check.Skills(playerId) + skillsGiven, playerId);
 
-            string qNewValues = @"
-            UPDATE players
-            set stamina = $1, skills = $2, money = $3 
-            WHERE id = $4;";
-
-            using var cmd = db.CreateCommand(qNewValues);
-            cmd.Parameters.AddWithValue(newStamina);
-            cmd.Parameters.AddWithValue(newSkills);
-            cmd.Parameters.AddWithValue(newCash);
-            cmd.Parameters.AddWithValue(playerId);
-            cmd.ExecuteNonQuery();
-
-            ClientResponse(res, $"{playerName} has purchased {product} for the price of {priceCash}$..");
+            ClientResponse(res, $"{check.Name(playerId)} has purchased {productName} for the price of {price}$..");
         }
         else
         {
-            ClientResponse(res, "Not enough money..");
+            ClientResponse(res, "Insufficient funds..");
         }
     }
     public void Study(string body)
@@ -228,10 +213,10 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
         int playerStamina = StaminaCheck(hackerId);
         if (playerStamina < 1)
         {
-            ErrorResponse(res, "*  Not enough stamina to execute hack! sleep to recover stamina" );
+            ErrorResponse(res, "*  Not enough stamina to execute hack! sleep to recover stamina");
             return;
         }
-        HackResult(hackerId,targetId, res);
+        HackResult(hackerId, targetId, res);
 
         ClientResponse(res, $"player {hackerId} succesfully hacked player {targetId}");
     }
@@ -245,7 +230,7 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
         var result = cmd.ExecuteScalar();
         return Convert.ToInt32(result) > 0;
     }
-    private void HackResult(int hackerId, int targetId,  HttpListenerResponse res)
+    private void HackResult(int hackerId, int targetId, HttpListenerResponse res)
     {
         Check check = new(db);
         Update update = new(db);
@@ -321,6 +306,6 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
     {
         res.StatusCode = 200; // OK
         byte[] buffer = Encoding.UTF8.GetBytes(successMessage);
-        res.OutputStream.Write(buffer, 0, buffer.Length);      
+        res.OutputStream.Write(buffer, 0, buffer.Length);
     }
 }
