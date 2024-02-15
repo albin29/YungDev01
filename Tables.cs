@@ -66,28 +66,32 @@ public class Table(NpgsqlDataSource db)
 
         string qStudySpotInsertions = @"
                 insert into study_spot (name, stamina_cost, skill_award) values
-                ('Neoschool', 2, 2),
-                ('Underground Study', 3, 3);";
+                ('Library', 1, 2),
+                ('Underground Study', 3, 6),
+                ('Neoschool', 4, 8),
+                ('Jensens Yrkeshögskola', 5, -2);";
+
 
         string qShopInsertions = @"
                 insert into shop(name, stamina_given, skills_given, price) values
                 ('AMD Ryzen Threadripper PRO 5995WX', 0, 20, 1000),
                 ('SAMSUNG Odyssey ARK 55', 0, 9, 500), 
-                ('Razer Death Adder', 0, 2, 65),
+                ('Razer Death Adder', 0, 1, 90),
                 ('Redbull ULTRA', 3, 0, 150),
                 ('Elias Snus', 1, 0, 60),
-                ('Manuels NVIM Addons', 0, 4, 150),
-                ('Project McFly', 0, 5, 125),
+                ('Pure Cocaine', 10, -5, 200),
+                ('Manuels NVIM Addons', 0, 4, 250),
+                ('Project McFly', 0, 3, 180),
                 ('NVIDIA RTX 4090', 0, 60, 2500);";
 
         string qWorkPlaceInsertions = @"
                 insert into workplace(name, skill_req, stamina_req, money_gain, skill_gain) values
-                ('Freelance Data Entry', 5, 3, 10, 0),
-                ('Web Developer', 8, 5, 20, 1),
-                ('Mobile App Developer', 15, 7, 30, 2),
-                ('Juniorr Developor', 20, 10, 50, 4),
-                ('Senior Developer', 30, 12, 60, 5),
-                ('Programming Teacher', 50, 20, 100, 3);";
+                ('Freelance Data Entry', 5, 1, 50, 0),
+                ('Web Developer', 20, 2, 200, 1),
+                ('Mobile App Developer', 30, 3, 300, 2),
+                ('Junior Developor', 40, 3, 500, 4),
+                ('Senior Developer', 60, 5, 600, 5),
+                ('Programming Teacher', 100, 5, 1500, 2);";
 
 
         await db.CreateCommand(qShopInsertions).ExecuteNonQueryAsync();

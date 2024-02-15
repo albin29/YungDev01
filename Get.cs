@@ -101,6 +101,10 @@ public class Get(HttpListenerRequest req, NpgsqlDataSource db)
             {
                 return ShowWork();
             }
+            if (path.Contains("/studyspots"))
+            {
+                return ShowStudy();
+            }
         }
         return "Not Found";
     }
@@ -174,17 +178,18 @@ public class Get(HttpListenerRequest req, NpgsqlDataSource db)
         string result = string.Empty;
         while (reader.Read())
         {
-            result += "[";
-            result += reader.GetInt32(0);
-            result += ". ";
-            result += reader.GetString(1);
-            result += "] Skills Given: ";
-            result += reader.GetInt32(2);
+            result += "ID[";
+            result += reader.GetInt32(0).ToString(); // Adjust padding width as needed
+            result += "] ";
+            result += reader.GetString(1).PadRight(35); // Adjust padding width as needed
+            result += " | Skills Given: ";
+            result += reader.GetInt32(2).ToString().PadRight(8); // Adjust padding width as needed
             result += " | Stamina Given: ";
-            result += reader.GetInt32(3);
+            result += reader.GetInt32(3).ToString().PadRight(8); // Adjust padding width as needed
             result += " | Price: ";
-            result += reader.GetInt32(4);
+            result += reader.GetInt32(4).ToString().PadRight(8); // Adjust padding width as needed
             result += "\n";
+
         }
         return result;
     }
@@ -216,19 +221,45 @@ public class Get(HttpListenerRequest req, NpgsqlDataSource db)
         string result = string.Empty;
         while (reader.Read())
         {
-            result += "[";
-            result += reader.GetInt32(0);
-            result += ". ";
-            result += reader.GetString(1);
-            result += "] Skills: ";
-            result += reader.GetInt32(4);
+            result += "ID[";
+            result += reader.GetInt32(0).ToString();
+            result += "] ";
+            result += reader.GetString(1).PadRight(10);
+            result += " | Skills: ";
+            result += reader.GetInt32(4).ToString().PadRight(8);
             result += " | Stamina: ";
-            result += reader.GetInt32(3);
+            result += reader.GetInt32(3).ToString().PadRight(8);
             result += " | Money: ";
-            result += reader.GetInt32(5);
+            result += reader.GetInt32(5).ToString().PadRight(8);
             result += " | Day: ";
-            result += reader.GetInt32(6);
+            result += reader.GetInt32(6).ToString().PadRight(8);
             result += "\n";
+
+        }
+        return result;
+    }
+
+    public string ShowStudy()
+    {
+        string qStudy = @"
+            SELECT id, name, stamina_cost, skill_award
+            FROM study_spot
+            ";
+        using var command = db.CreateCommand(qStudy);
+        var reader = command.ExecuteReader();
+
+        string result = string.Empty;
+        while (reader.Read())
+        {
+              result += "ID[";
+        result += reader.GetInt32(0).ToString();
+        result += "] ";
+        result += reader.GetString(1).PadRight(21);
+        result += " | Stamina Requirement: ";
+        result += reader.GetInt32(2).ToString().PadRight(5);
+        result += " | Skill Gain: ";
+        result += reader.GetInt32(3).ToString().PadRight(5);
+        result += "\n";
         }
         return result;
     }

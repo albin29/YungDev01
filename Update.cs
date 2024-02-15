@@ -49,7 +49,7 @@ public class Update(NpgsqlDataSource db)
     {
         string qUpdatedDay = @"
         update players
-        set skills = $1 
+        set day = $1 
         where id = $2;";
 
         using var command = db.CreateCommand(qUpdatedDay);

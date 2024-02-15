@@ -29,8 +29,8 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
                 Sleep(body);
                 Console.WriteLine($"Registered the following {body}");
 
-                RandomEventGenerator randomEvent = new(db, body);
-                Random random = new();
+                Random randomEvent = new(db, body);
+                System.Random random = new();
                 int result = random.Next(1, 3);
 
                 if (result == 1)
@@ -231,7 +231,7 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
     {
         Check check = new(db);
         Update update = new(db);
-        Random rnd = new Random();
+        System.Random rnd = new System.Random();
         int randomskill = rnd.Next(3, 11);
         int randommoney = rnd.Next(0, 101);
         int staminacost = 1;
@@ -326,20 +326,24 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
                             staminaReq = 1;
                             break;
                         case "job2":
-                            skillRequirment = 10;
-                            staminaReq = 3;
+                            skillRequirment = 20;
+                            staminaReq = 2;
                             break;
                         case "job3":
-                            skillRequirment = 25;
-                            staminaReq = 5;
+                            skillRequirment = 30;
+                            staminaReq = 3;
                             break;
                         case "job4":
-                            skillRequirment = 50;
-                            staminaReq = 7;
+                            skillRequirment = 40;
+                            staminaReq = 3;
                             break;
                         case "job5":
+                            skillRequirment = 60;
+                            staminaReq = 5;
+                            break;
+                        case "job6":
                             skillRequirment = 100;
-                            staminaReq = 8;
+                            staminaReq = 5;
                             break;
                             default:
                                 ErrorResponse(res, "Invalid job selected");
@@ -368,32 +372,39 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
             switch (job)
             {
                 case "job1":
-                    moneyEarned = 100;
+                    moneyEarned = 50;
                     staminaloss = 1;
                     ClientResponse(res, $"Good job! you earned {moneyEarned}$ at the cost of {staminaloss} stamina!");
                     break;
                 case "job2":
-                    moneyEarned = 150;
-                    staminaloss = 3;
-                    ClientResponse(res,$"Good job! you earned {moneyEarned}$ at the cost of {staminaloss} stamina!");
+                    moneyEarned = 200;
+                    staminaloss = 2;
+                    skillGain = 1;
+                    ClientResponse(res, $"Good job! today you learned alot! you gained {skillGain} skill points ,you also earned {moneyEarned}$ at the cost of {staminaloss} stamina!");
                     break;
                 case "job3":
                     moneyEarned = 300;
-                    staminaloss = 5;
-                    skillGain = 10;
-                    ClientResponse(res, $"Good job! today you learned alot ! you gained {skillGain} skillpoints ,you also earned {moneyEarned}$ at the cost of {staminaloss} stamina!");
+                    staminaloss = 3;
+                    skillGain = 2;
+                    ClientResponse(res, $"Good job! today you learned alot! you gained {skillGain} skill points ,you also earned {moneyEarned}$ at the cost of {staminaloss} stamina!");
                     break;
                 case "job4":
-                    moneyEarned = 600;
-                    staminaloss = 7;
-                    skillGain = 25;
-                    ClientResponse(res, $"Good job! today you learned alot ! you gained {skillGain} skillpoints ,you also earned {moneyEarned}$ at the cost of {staminaloss} stamina!");
+                    moneyEarned = 500;
+                    staminaloss = 3;
+                    skillGain = 4;
+                    ClientResponse(res, $"Good job! today you learned alot! you gained {skillGain} skill points ,you also earned {moneyEarned}$ at the cost of {staminaloss} stamina!");
                     break;
                 case "job5":
                     moneyEarned = 600;
-                    staminaloss = 8;
-                    skillGain = 100;
-                    ClientResponse(res, $"Good job! you just became a real YungDev! you gained {skillGain} skillpoints ,you also earned {moneyEarned}$ at the cost of {staminaloss} stamina!");
+                    staminaloss = 5;
+                    skillGain = 5;
+                    ClientResponse(res, $"Good job! today you learned alot! You gained {skillGain} skill points, you also earned {moneyEarned}$ at the cost of {staminaloss} stamina!");
+                    break;
+                case "job6":
+                    moneyEarned = 1500;
+                    staminaloss = 5;
+                    skillGain = 2;
+                    ClientResponse(res, $"Good job! you just became a real YungDev! You gained {skillGain} skillpoints, you also earned {moneyEarned}$ at the cost of {staminaloss} stamina!");
                     break;
             }
 
@@ -411,7 +422,6 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
                 updateCmd.ExecuteNonQuery();
 
             }
-            ClientResponse(res, $"Good job!! you earned {moneyEarned}$ and it cost you {staminaloss} stamina! ");
         }
     }
 
