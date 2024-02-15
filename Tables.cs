@@ -13,8 +13,9 @@ public class Table(NpgsqlDataSource db)
 {
     public async Task CreateTable()
     {
-        await db.CreateCommand("DROP TABLE IF EXISTS study_spot cascade").ExecuteNonQueryAsync();
+        await db.CreateCommand("DROP TABLE IF EXISTS study_spot CASCADE").ExecuteNonQueryAsync();
         await db.CreateCommand("DROP TABLE IF EXISTS shop CASCADE").ExecuteNonQueryAsync();
+        await db.CreateCommand("DROP TABLE IF EXISTS workplace CASCADE").ExecuteNonQueryAsync();
 
         string qShop = @"
                 create table if not exists shop(
@@ -48,20 +49,30 @@ public class Table(NpgsqlDataSource db)
                 player_name     text,
                 points          int);";
 
+        string qWorkPlace = @"
+                CREATE TABLE IF NOT EXISTS workplace(
+                id              serial primary key,
+                name            text,
+                skill_req       int,
+                stamina_req     int,
+                skill_gain      int,
+                money_gain      int);";
+
         await db.CreateCommand(qStudySpot).ExecuteNonQueryAsync();
         await db.CreateCommand(qPlayers).ExecuteNonQueryAsync();
         await db.CreateCommand(qHighscore).ExecuteNonQueryAsync();
         await db.CreateCommand(qShop).ExecuteNonQueryAsync();
+        await db.CreateCommand(qWorkPlace).ExecuteNonQueryAsync();
 
         string qStudySpotInsertions = @"
                 insert into study_spot (name, stamina_cost, skill_award) values
                 ('Neoschool', 2, 2),
                 ('Underground Study', 3, 3);";
 
-        string qShopInsertions= @"
+        string qShopInsertions = @"
                 insert into shop(name, stamina_given, skills_given, price) values
                 ('AMD Ryzen Threadripper PRO 5995WX', 0, 20, 1000),
-                ('SAMSUNG Odyssey ARK 55¨', 0, 9, 500),
+                ('SAMSUNG Odyssey ARK 55', 0, 9, 500), 
                 ('Razer Death Adder', 0, 2, 65),
                 ('Redbull ULTRA', 3, 0, 150),
                 ('Elias Snus', 1, 0, 60),
@@ -69,9 +80,19 @@ public class Table(NpgsqlDataSource db)
                 ('Project McFly', 0, 5, 125),
                 ('NVIDIA RTX 4090', 0, 60, 2500);";
 
+        string qWorkPlaceInsertions = @"
+                insert into workplace(name, skill_req, stamina_req, money_gain, skill_gain) values
+                ('Freelance Data Entry', 5, 3, 10, 0),
+                ('Web Developer', 8, 5, 20, 1),
+                ('Mobile App Developer', 15, 7, 30, 2),
+                ('Juniorr Developor', 20, 10, 50, 4),
+                ('Senior Developer', 30, 12, 60, 5),
+                ('Programming Teacher', 50, 20, 100, 3);";
+
 
         await db.CreateCommand(qShopInsertions).ExecuteNonQueryAsync();
         await db.CreateCommand(qStudySpotInsertions).ExecuteNonQueryAsync();
+        await db.CreateCommand(qWorkPlaceInsertions).ExecuteNonQueryAsync();
 
 
         string triggerSQL = @"
