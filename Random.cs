@@ -7,7 +7,7 @@ using Npgsql;
 
 namespace YungDev01;
 
-public class RandomEventGenerator(NpgsqlDataSource db, string playerId)
+public class Random(NpgsqlDataSource db, string playerId)
 {
     public string Event()
     {
@@ -15,7 +15,7 @@ public class RandomEventGenerator(NpgsqlDataSource db, string playerId)
 
         Update update = new(db);
         Check check = new(db);
-        Random random = new();
+        System.Random random = new();
 
         int roll = random.Next(1, 11);
 
@@ -61,6 +61,6 @@ public class RandomEventGenerator(NpgsqlDataSource db, string playerId)
                             "girlfriend took some money for shopping\n* -300$";
         }
 
-        return "***EVENT TRIGGERED***\n\n" + eventResponse;
+        return "\u001b[91;1m**** EVENT TRIGGERED ****\u001b[0m\n\n" + eventResponse;
     }
 }
