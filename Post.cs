@@ -59,7 +59,7 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
 
             if (path.Contains("work"))
             {
-                GoToWork(res,body,req);
+                Work(body);
             }
         }
     }
@@ -101,6 +101,48 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
             ClientResponse(res, "Insufficient funds..");
         }
     }
+
+
+    public void Work(string body)
+    {
+        string[] fields = body.Split(",");
+        int playerId = Convert.ToInt32(fields[0]), shopId = Convert.ToInt32(fields[1]);
+
+       string qCheckValues = @"
+            SELECT name, skill_req, stamina_req, money_gain, skill_gain
+            FROM workplace
+            WHERE id = $1;";
+
+        using var command = db.CreateCommand(qCheckValues);
+        command.Parameters.AddWithValue(shopId);
+
+        int staminaRequired = 0, moneyGain = 0, skillGain = 0, skillRequired = 0;
+        string jobName = string.Empty;
+
+        var reader = command.ExecuteReader();
+        while (reader.Read())
+        {
+            jobName = reader.GetString(0);
+            skillRequired = reader.GetInt32(1);
+            staminaRequired = reader.GetInt32(2);
+            moneyGain = reader.GetInt32(3);
+            skillGain = reader.GetInt32(4);
+        }
+
+        if (check.Stamina(playerId) >= staminaRequired && check.Skills(playerId) >= skillRequired)
+        {
+            update.Money(check.Money(playerId) + moneyGain, playerId);
+            update.Skills(check.Skills(playerId) + skillGain, playerId);
+            update.Stamina(check.Stamina(playerId) - staminaRequired, playerId);
+
+            ClientResponse(res, $"{check.Name(playerId)} has worked as a {jobName} and gained {moneyGain}$ and {skillGain} skill points.");
+        }
+        else
+        {
+            ClientResponse(res, $"{check.Name(playerId)} does not meet the requirements to work as {jobName}.");
+        }
+    }
+
     public void Study(string body)
     {
         string qGetCurrentStamina = @"
@@ -292,141 +334,6 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
             return result != DBNull.Value ? Convert.ToInt32(result) : 0;
         }
     }
-
-    public void GoToWork(HttpListenerResponse res, string body, HttpListenerRequest req)
-    {
-                    
-        string job = req.Headers["Job"];
-
-        if (int.TryParse(body, out int workerId))
-        {
-            string qWorkerId = @"SELECT id, stamina,skills FROM players WHERE id = $1";
-            using (var cmd = db.CreateCommand())
-            {
-                cmd.CommandText = qWorkerId;
-                cmd.Parameters.AddWithValue(workerId);
-
-                using (var reader = cmd.ExecuteReader())
-                {
-                    if (!reader.Read())
-                    {
-                        ErrorResponse(res, "Invalid ID, Try another One");
-                        return;
-                    }
-
-                    int workerStamina = reader.IsDBNull(reader.GetOrdinal("stamina")) ? 0 : reader.GetInt32(reader.GetOrdinal("stamina"));
-                    int workerSkill = reader.IsDBNull(reader.GetOrdinal("skills")) ? 0 : reader.GetInt32(reader.GetOrdinal("skills"));
-
-                    int skillRequirment = 0;
-                    int staminaReq = 0;
-                    switch (job)
-                    {
-                        case "job1":
-                            skillRequirment = 5;
-                            staminaReq = 1;
-                            break;
-                        case "job2":
-                            skillRequirment = 20;
-                            staminaReq = 2;
-                            break;
-                        case "job3":
-                            skillRequirment = 30;
-                            staminaReq = 3;
-                            break;
-                        case "job4":
-                            skillRequirment = 40;
-                            staminaReq = 3;
-                            break;
-                        case "job5":
-                            skillRequirment = 60;
-                            staminaReq = 5;
-                            break;
-                        case "job6":
-                            skillRequirment = 100;
-                            staminaReq = 5;
-                            break;
-                            default:
-                                ErrorResponse(res, "Invalid job selected");
-                                break;
-                    }
-
-                    if (workerSkill < skillRequirment)
-                    {
-                        ErrorResponse(res, "Not enough skill for this job! Go to school");
-                        return;
-                    }
-
-                    if (workerStamina < staminaReq)
-                    {
-                        ErrorResponse(res, "Not enough stamina!");
-                        return;
-                    }
-
-                }
-            }
-
-
-            int moneyEarned = 0;
-            int staminaloss = 0;
-            int skillGain = 0;
-            switch (job)
-            {
-                case "job1":
-                    moneyEarned = 50;
-                    staminaloss = 1;
-                    ClientResponse(res, $"Good job! you earned {moneyEarned}$ at the cost of {staminaloss} stamina!");
-                    break;
-                case "job2":
-                    moneyEarned = 200;
-                    staminaloss = 2;
-                    skillGain = 1;
-                    ClientResponse(res, $"Good job! today you learned alot! you gained {skillGain} skill points ,you also earned {moneyEarned}$ at the cost of {staminaloss} stamina!");
-                    break;
-                case "job3":
-                    moneyEarned = 300;
-                    staminaloss = 3;
-                    skillGain = 2;
-                    ClientResponse(res, $"Good job! today you learned alot! you gained {skillGain} skill points ,you also earned {moneyEarned}$ at the cost of {staminaloss} stamina!");
-                    break;
-                case "job4":
-                    moneyEarned = 500;
-                    staminaloss = 3;
-                    skillGain = 4;
-                    ClientResponse(res, $"Good job! today you learned alot! you gained {skillGain} skill points ,you also earned {moneyEarned}$ at the cost of {staminaloss} stamina!");
-                    break;
-                case "job5":
-                    moneyEarned = 600;
-                    staminaloss = 5;
-                    skillGain = 5;
-                    ClientResponse(res, $"Good job! today you learned alot! You gained {skillGain} skill points, you also earned {moneyEarned}$ at the cost of {staminaloss} stamina!");
-                    break;
-                case "job6":
-                    moneyEarned = 1500;
-                    staminaloss = 5;
-                    skillGain = 2;
-                    ClientResponse(res, $"Good job! you just became a real YungDev! You gained {skillGain} skillpoints, you also earned {moneyEarned}$ at the cost of {staminaloss} stamina!");
-                    break;
-            }
-
-            
-            string qWork = @"UPDATE players SET money = money + $1, stamina = stamina - $2 ,skills = skills +$3 WHERE id = $4 AND stamina >= $2";
-            using (var updateCmd = db.CreateCommand())
-            {
-                updateCmd.CommandText = qWork;
-                updateCmd.Parameters.AddWithValue(moneyEarned);
-                updateCmd.Parameters.AddWithValue(staminaloss);
-                updateCmd.Parameters.AddWithValue(skillGain);
-                updateCmd.Parameters.AddWithValue(workerId);
-
-
-                updateCmd.ExecuteNonQuery();
-
-            }
-        }
-    }
-
-
-
 
     private void ErrorResponse(HttpListenerResponse res, string errorMessage)
     {
