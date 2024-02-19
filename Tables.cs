@@ -17,6 +17,7 @@ public class Table(NpgsqlDataSource db)
         await db.CreateCommand("DROP TABLE IF EXISTS shop CASCADE").ExecuteNonQueryAsync();
         await db.CreateCommand("DROP TABLE IF EXISTS workplace CASCADE").ExecuteNonQueryAsync();
 
+
         string qShop = @"
                 create table if not exists shop(
                 id              serial      primary key,

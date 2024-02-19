@@ -27,20 +27,9 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
             if (path.Contains("sleep"))
             {
                 Sleep(body);
-                Console.WriteLine($"Registered the following {body}");
+                Console.WriteLine("Player went to sleep");
 
-                Random randomEvent = new(db, body);
-                System.Random random = new();
-                int result = random.Next(1, 3);
-
-                if (result == 1)
-                {
-                    ClientResponse(res, randomEvent.Event());
-                }
-                else
-                {
-                    ClientResponse(res, "No event was triggered..\n");
-                }
+                
             }
             if (path.Contains("study"))
             {
@@ -205,10 +194,42 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
 
         while (reader.Read()) { day = reader.GetInt32(0); }
 
-        int playerId = Convert.ToInt32(body);
+        if (day <= 10)
+        {
+            ClientResponse(res, @"
+            
+            ");
+            ClientResponse(res, @$"Current day: {day}
 
-        update.Stamina(5, playerId);
-        update.Day(day + 1, playerId);
+            ");
+            Random randomEvent = new(db, body);
+            System.Random random = new();
+            int result = random.Next(1, 3);
+
+            if (result == 1)
+            {
+                ClientResponse(res, randomEvent.Event());
+            }
+            else
+            {
+                ClientResponse(res, "No event was triggered..\n");
+            }
+            int playerId = Convert.ToInt32(body);
+
+            update.Stamina(5, playerId);
+            update.Day(day + 1, playerId);
+            if (day == 10)
+            {
+                ClientResponse(res, "Day 10 reached! Last day, when you run out of stamina, it's game over. Make the most of it!");
+            }
+        }
+        else if (day >= 11)
+        {
+            ClientResponse(res, @"
+
+            This character has already reached day 10!");
+        }
+
     }
     public void PlayerRegister(string body)
     {
