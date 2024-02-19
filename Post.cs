@@ -205,10 +205,18 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
 
         while (reader.Read()) { day = reader.GetInt32(0); }
 
-        int playerId = Convert.ToInt32(body);
+        if (day <= 10)
+        {
+            int playerId = Convert.ToInt32(body);
 
-        update.Stamina(5, playerId);
-        update.Day(day + 1, playerId);
+            update.Stamina(5, playerId);
+            update.Day(day + 1, playerId);
+            if (day == 10)
+            {
+                Console.WriteLine("Day 10 reached! Last day, make the most of it!");
+            }
+        }
+
     }
     public void PlayerRegister(string body)
     {
