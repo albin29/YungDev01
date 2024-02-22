@@ -16,6 +16,8 @@ public class Table(NpgsqlDataSource db)
         await db.CreateCommand("DROP TABLE IF EXISTS study_spot CASCADE").ExecuteNonQueryAsync();
         await db.CreateCommand("DROP TABLE IF EXISTS shop CASCADE").ExecuteNonQueryAsync();
         await db.CreateCommand("DROP TABLE IF EXISTS workplace CASCADE").ExecuteNonQueryAsync();
+        await db.CreateCommand("DROP TABLE IF EXISTS CASCADE").ExecuteNonQueryAsync();
+
 
 
         string qShop = @"
@@ -37,7 +39,6 @@ public class Table(NpgsqlDataSource db)
                 create table if not exists players(
                 id              serial      primary key,
                 name            text        unique,
-                password        text,
                 stamina         int,
                 skills          int,
                 money           int,

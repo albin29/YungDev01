@@ -235,15 +235,14 @@ public class Post(NpgsqlDataSource db, HttpListenerRequest req, HttpListenerResp
     {
         int stamina = 5, skills = 0, money = 100, day = 1;
         string[] fields = body.Split(',');
-        string name = fields[0], password = fields[1];
+        string name = fields[0];
 
         string qRegisterPlayer = @"
-        insert into players (name,password,stamina,skills,money,day) Values
-        ($1, $2, $3, $4, $5, $6);";
+        insert into players (name,stamina,skills,money,day) Values
+        ($1, $2, $3, $4, $5);";
 
         var cmd = db.CreateCommand(qRegisterPlayer);
         cmd.Parameters.AddWithValue(name);
-        cmd.Parameters.AddWithValue(password);
         cmd.Parameters.AddWithValue(stamina);
         cmd.Parameters.AddWithValue(skills);
         cmd.Parameters.AddWithValue(money);

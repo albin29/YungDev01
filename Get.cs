@@ -38,7 +38,7 @@ public class Get(HttpListenerRequest req, NpgsqlDataSource db)
         "; menu += "\t\t\t\t\t\t\t\t\t\t\t\t\t\u001b[91;1m    curl -x POST localhost:3000/hack -d yourid,victimid \u001b[0m\n";
 
         menu += "\t\t\t\t\t\t\t\t\t\t\t\t\t\t    ----------------------------------------------\n";
-        menu += "\u001b[91;1m        curl -X POST localhost:3000/register -d YourName,YourPassword \u001b[0m\n";
+        menu += "\u001b[91;1m        curl -X POST localhost:3000/register -d YourName \u001b[0m\n";
         menu += @"
         ----------------------------------------------                                                              Studying at different locations 
         Exploring Player Information:                                                                               ----------------------------------------------
